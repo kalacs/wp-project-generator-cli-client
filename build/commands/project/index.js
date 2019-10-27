@@ -117,7 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"index.js":[function(require,module,exports) {
+})({"project/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -133,16 +133,10 @@ var _ink = require("ink");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/// Hello world commandfffff
-const Hello = ({
-  name
-}) => _react.default.createElement(_ink.Text, null, "Hello, ", name);
+/// Project index
+const ProjectIndex = () => _react.default.createElement(_ink.Text, null, "This is index of project command");
 
-Hello.propTypes = {
-  /// Name of the person to greet
-  name: _propTypes.default.string.isRequired
-};
-var _default = Hello;
+var _default = ProjectIndex;
 exports.default = _default;
-},{}]},{},["index.js"], null)
-//# sourceMappingURL=/index.js.map
+},{}]},{},["project/index.js"], null)
+//# sourceMappingURL=/project/index.js.map

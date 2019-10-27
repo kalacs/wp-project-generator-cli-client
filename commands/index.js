@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Text} from 'ink';
 
-/// Hello world command
+/// Hello world commandfffff
 const Hello = ({name}) => <Text>Hello, {name}</Text>;
 
 Hello.propTypes = {
