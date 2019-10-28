@@ -117,146 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../components/TextInput.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = TextInput;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _inkTextInput = _interopRequireDefault(require("ink-text-input"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-function TextInput(_ref) {
-  let {
-    onBlur,
-    onFocus
-  } = _ref,
-      props = _objectWithoutProperties(_ref, ["onBlur", "onFocus"]);
-
-  _react.default.useEffect(() => {
-    onFocus();
-    return onBlur;
-  }, [onFocus, onBlur]);
-
-  return _react.default.createElement(_inkTextInput.default, props);
-}
-},{}],"../components/SelectInput.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = SelectInput;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _inkSelectInput = _interopRequireDefault(require("ink-select-input"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-function SelectInput(_ref) {
-  let {
-    onSubmit,
-    onBlur,
-    onChange,
-    onFocus
-  } = _ref,
-      props = _objectWithoutProperties(_ref, ["onSubmit", "onBlur", "onChange", "onFocus"]);
-
-  _react.default.useEffect(() => {
-    onFocus();
-    return onBlur;
-  }, [onFocus, onBlur]);
-
-  return _react.default.createElement(_inkSelectInput.default, _extends({}, props, {
-    onSelect: ({
-      value
-    }) => {
-      onChange(value);
-      onSubmit();
-    }
-  }));
-}
-},{}],"../components/MultiSelectInput.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = MultiSelectInput;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _inkMultiSelect = _interopRequireDefault(require("ink-multi-select"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-function MultiSelectInput(_ref) {
-  let {
-    onBlur,
-    onChange,
-    onFocus,
-    value = []
-  } = _ref,
-      props = _objectWithoutProperties(_ref, ["onBlur", "onChange", "onFocus", "value"]);
-
-  _react.default.useEffect(() => {
-    onFocus();
-    return onBlur;
-  }, [onFocus, onBlur]);
-
-  return _react.default.createElement(_inkMultiSelect.default, _extends({}, props, {
-    onSelect: ({
-      value: v
-    }) => onChange(value.concat(v)),
-    onUnselect: ({
-      value: v
-    }) => onChange(value.filter(item => item !== v))
-  }));
-}
-},{}],"../components/Error.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = Error;
-
-var _react = _interopRequireDefault(require("react"));
-
-var _ink = require("ink");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function Error({
-  children
-}) {
-  return _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
-    red: true
-  }, children));
-}
-},{}],"../services/http-client.js":[function(require,module,exports) {
+})({"../services/http-client.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -407,7 +268,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = createWPManagerClient;
 
-var _httpClient = _interopRequireDefault(require("./http-client"));
+var _httpClient = _interopRequireDefault(require("../services/http-client"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -428,7 +289,194 @@ function createWPManagerClient({
     createWordpressProject: async params => await projectsEndpoint.post(params)
   };
 }
-},{"./http-client":"../services/http-client.js"}],"project/create.js":[function(require,module,exports) {
+},{"../services/http-client":"../services/http-client.js"}],"../components/TextInput.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = TextInput;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _inkTextInput = _interopRequireDefault(require("ink-text-input"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+function TextInput(_ref) {
+  let {
+    onBlur,
+    onFocus
+  } = _ref,
+      props = _objectWithoutProperties(_ref, ["onBlur", "onFocus"]);
+
+  _react.default.useEffect(() => {
+    onFocus();
+    return onBlur;
+  }, [onFocus, onBlur]);
+
+  return _react.default.createElement(_inkTextInput.default, props);
+}
+},{}],"../components/SelectInput.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = SelectInput;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _inkSelectInput = _interopRequireDefault(require("ink-select-input"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+function SelectInput(_ref) {
+  let {
+    onSubmit,
+    onBlur,
+    onChange,
+    onFocus
+  } = _ref,
+      props = _objectWithoutProperties(_ref, ["onSubmit", "onBlur", "onChange", "onFocus"]);
+
+  _react.default.useEffect(() => {
+    onFocus();
+    return onBlur;
+  }, [onFocus, onBlur]);
+
+  return _react.default.createElement(_inkSelectInput.default, _extends({}, props, {
+    onSelect: ({
+      value
+    }) => {
+      onChange(value);
+      onSubmit();
+    }
+  }));
+}
+},{}],"../components/MultiSelectInput.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = MultiSelectInput;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _inkMultiSelect = _interopRequireDefault(require("ink-multi-select"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+function MultiSelectInput(_ref) {
+  let {
+    onBlur,
+    onChange,
+    onFocus,
+    value = []
+  } = _ref,
+      props = _objectWithoutProperties(_ref, ["onBlur", "onChange", "onFocus", "value"]);
+
+  _react.default.useEffect(() => {
+    onFocus();
+    return onBlur;
+  }, [onFocus, onBlur]);
+
+  return _react.default.createElement(_inkMultiSelect.default, _extends({}, props, {
+    onSelect: ({
+      value: v
+    }) => onChange(value.concat(v)),
+    onUnselect: ({
+      value: v
+    }) => onChange(value.filter(item => item !== v))
+  }));
+}
+},{}],"../utils/factories/field-creators.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createMultiSelectInput = exports.createSelectInput = exports.createTextInput = void 0;
+
+var _TextInput = _interopRequireDefault(require("../../components/TextInput"));
+
+var _SelectInput = _interopRequireDefault(require("../../components/SelectInput"));
+
+var _MultiSelectInput = _interopRequireDefault(require("../../components/MultiSelectInput"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const createTextInput = (name, label, placeholder = '', format = value => value || '', validate = () => undefined) => ({
+  name,
+  label,
+  placeholder,
+  format,
+  validate,
+  Input: _TextInput.default
+});
+
+exports.createTextInput = createTextInput;
+
+const createSelectInput = (name, label, inputConfig, format = value => value || '', validate = () => undefined) => ({
+  name,
+  label,
+  inputConfig,
+  format,
+  validate,
+  Input: _SelectInput.default
+});
+
+exports.createSelectInput = createSelectInput;
+
+const createMultiSelectInput = (name, label, inputConfig, format = value => value, validate = undefined) => ({
+  name,
+  label,
+  inputConfig,
+  format,
+  validate,
+  Input: _MultiSelectInput.default
+});
+
+exports.createMultiSelectInput = createMultiSelectInput;
+},{"../../components/TextInput":"../components/TextInput.js","../../components/SelectInput":"../components/SelectInput.js","../../components/MultiSelectInput":"../components/MultiSelectInput.js"}],"../components/Error.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Error;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _ink = require("ink");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function Error({
+  children
+}) {
+  return _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
+    red: true
+  }, children));
+}
+},{}],"../components/FormField.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -442,17 +490,77 @@ var _reactFinalForm = require("react-final-form");
 
 var _ink = require("ink");
 
-var _TextInput = _interopRequireDefault(require("../../components/TextInput"));
+var _Error = _interopRequireDefault(require("../components/Error"));
 
-var _SelectInput = _interopRequireDefault(require("../../components/SelectInput"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _MultiSelectInput = _interopRequireDefault(require("../../components/MultiSelectInput"));
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-var _Error = _interopRequireDefault(require("../../components/Error"));
+const FormField = ({
+  name,
+  label,
+  placeholder,
+  format,
+  validate,
+  Input,
+  inputConfig,
+  onSubmit,
+  isActive
+}) => _react.default.createElement(_reactFinalForm.Field, {
+  name: name,
+  key: name,
+  format: format,
+  validate: validate
+}, ({
+  input,
+  meta
+}) => _react.default.createElement(_ink.Box, {
+  flexDirection: "column"
+}, _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
+  bold: isActive
+}, label, ": "), isActive ? _react.default.createElement(Input, _extends({}, input, inputConfig, {
+  placeholder: placeholder,
+  onSubmit: () => {
+    onSubmit({
+      input,
+      meta
+    });
+  }
+})) : input.value && _react.default.createElement(_ink.Text, null, input.value) || placeholder && _react.default.createElement(_ink.Color, {
+  gray: true
+}, placeholder), meta.invalid && meta.touched && _react.default.createElement(_ink.Box, {
+  marginLeft: 2
+}, _react.default.createElement(_ink.Color, {
+  red: true
+}, "\u2716")), meta.valid && meta.touched && meta.inactive && _react.default.createElement(_ink.Box, {
+  marginLeft: 2
+}, _react.default.createElement(_ink.Color, {
+  green: true
+}, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error)));
+
+var _default = FormField;
+exports.default = _default;
+},{"../components/Error":"../components/Error.js"}],"project/create.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactFinalForm = require("react-final-form");
+
+var _ink = require("ink");
 
 var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
 
 var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
+
+var _fieldCreators = require("../../utils/factories/field-creators");
+
+var _FormField = _interopRequireDefault(require("../../components/FormField"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -463,40 +571,12 @@ const wpManagerClient = (0, _wpManagerClient.default)({
   password: 'test',
   baseURL: 'http://127.0.0.1:3000',
   logger: {
-    trace: console.log,
-    info: console.log,
-    error: console.error
+    trace: () => {},
+    info: () => {},
+    error: () => {}
   }
 });
-
-const createTextInput = (name, label, placeholder = '', format = value => value || '', validate = () => undefined) => ({
-  name,
-  label,
-  placeholder,
-  format,
-  validate,
-  Input: _TextInput.default
-});
-
-const createSelectInput = (name, label, inputConfig, format = value => value || '', validate = () => undefined) => ({
-  name,
-  label,
-  inputConfig,
-  format,
-  validate,
-  Input: _SelectInput.default
-});
-
-const createMultiSelectInput = (name, label, inputConfig, format = value => value, validate = undefined) => ({
-  name,
-  label,
-  inputConfig,
-  format,
-  validate,
-  Input: _MultiSelectInput.default
-});
-
-const fields = [createTextInput('project.prefix', 'Project prefix', 'my-awesome-project', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', value => !value ? 'Require' : undefined), createTextInput('project.path', 'Project path', '/home/user/localSites', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', value => !value ? 'Require' : undefined), createTextInput('project.database.name', 'Database name'), createTextInput('project.database.user', 'Database user'), createTextInput('project.database.password', 'Database password'), createTextInput('project.database.rootPassword', 'Database root password'), createTextInput('project.webserver.port', 'Webserver port')]; /// CliForm
+const fields = [(0, _fieldCreators.createTextInput)('project.prefix', 'Project prefix', 'my-awesome-project', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', value => !value ? 'Require' : undefined), (0, _fieldCreators.createTextInput)('project.path', 'Project path', '/home/user/localSites', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', value => !value ? 'Require' : undefined), (0, _fieldCreators.createTextInput)('project.database.name', 'Database name'), (0, _fieldCreators.createTextInput)('project.database.user', 'Database user'), (0, _fieldCreators.createTextInput)('project.database.password', 'Database password'), (0, _fieldCreators.createTextInput)('project.database.rootPassword', 'Database root password'), (0, _fieldCreators.createTextInput)('project.webserver.port', 'Webserver port')]; /// CliForm
 
 const CliForm = () => {
   const [activeField, setActiveField] = _react.default.useState(0);
@@ -525,21 +605,21 @@ const CliForm = () => {
     validate,
     Input,
     inputConfig
-  }, index) => _react.default.createElement(_reactFinalForm.Field, {
-    name: name,
-    key: name,
-    format: format,
-    validate: validate
-  }, ({
-    input,
-    meta
-  }) => _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
-  }, _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
-    bold: activeField === index
-  }, label, ": "), activeField === index ? _react.default.createElement(Input, _extends({}, input, inputConfig, {
-    placeholder: placeholder,
-    onSubmit: () => {
+  }, index) => _react.default.createElement(_FormField.default, _extends({
+    key: name
+  }, {
+    name,
+    label,
+    placeholder,
+    format,
+    validate,
+    Input,
+    inputConfig,
+    isActive: activeField === index,
+    onSubmit: ({
+      meta,
+      input
+    }) => {
       if (meta.valid && !validating) {
         setActiveField(value => value + 1); // go to next field
 
@@ -551,23 +631,7 @@ const CliForm = () => {
         input.onBlur(); // mark as touched to show error
       }
     }
-  })) : input.value && _react.default.createElement(_ink.Text, null, input.value) || placeholder && _react.default.createElement(_ink.Color, {
-    gray: true
-  }, placeholder), validating && name === 'name' && _react.default.createElement(_ink.Box, {
-    marginLeft: 1
-  }, _react.default.createElement(_ink.Color, {
-    yellow: true
-  }, _react.default.createElement(_inkSpinner.default, {
-    type: "dots"
-  }))), meta.invalid && meta.touched && _react.default.createElement(_ink.Box, {
-    marginLeft: 2
-  }, _react.default.createElement(_ink.Color, {
-    red: true
-  }, "\u2716")), meta.valid && meta.touched && meta.inactive && _react.default.createElement(_ink.Box, {
-    marginLeft: 2
-  }, _react.default.createElement(_ink.Color, {
-    green: true
-  }, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error)))), submission ? isLoading ? _react.default.createElement(_ink.Box, {
+  }))), submission ? isLoading ? _react.default.createElement(_ink.Box, {
     marginLeft: 1
   }, _react.default.createElement(_ink.Color, {
     yellow: true
@@ -578,5 +642,5 @@ const CliForm = () => {
 
 var _default = CliForm;
 exports.default = _default;
-},{"../../components/TextInput":"../components/TextInput.js","../../components/SelectInput":"../components/SelectInput.js","../../components/MultiSelectInput":"../components/MultiSelectInput.js","../../components/Error":"../components/Error.js","../../services/wp-manager-client":"../services/wp-manager-client.js"}]},{},["project/create.js"], null)
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js"}]},{},["project/create.js"], null)
 //# sourceMappingURL=/project/create.js.map

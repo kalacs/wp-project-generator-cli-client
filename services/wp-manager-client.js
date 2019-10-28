@@ -1,5 +1,4 @@
-import makeClient from './http-client';
-
+import makeClient from '../services/http-client';
 
 export default function createWPManagerClient({
     user,
