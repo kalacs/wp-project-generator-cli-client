@@ -25,7 +25,7 @@
 				{
 					"path": "project/create.js",
 					"name": "create",
-					"description": "CliForm",
+					"description": "Generate new wordpress project from template",
 					"args": [],
 					"subCommands": []
 				}

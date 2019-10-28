@@ -16,6 +16,7 @@ const wpManagerClient = createWPManagerClient({
 		error: () => {}
 	}
   });
+const isRequired = value => !value ? 'Required' : undefined; 
 
 const fields = [
 	createTextInput(
@@ -27,27 +28,16 @@ const fields = [
 							.replace(/[^a-z \\-]/g, '')
 							.replace(/ /g, '-')
 						: '',
-		value => !value ? 'Require' : undefined
+		isRequired
 	),
-	createTextInput(
-		'project.path',
-		'Project path',
-		'/home/user/localSites',
-		value => value ? value
-							.toLowerCase()
-							.replace(/[^a-z \\-]/g, '')
-							.replace(/ /g, '-')
-						: '',
-		value => !value ? 'Require' : undefined
-	),
-	createTextInput('project.database.name', 'Database name'),
-	createTextInput('project.database.user', 'Database user'),
-	createTextInput('project.database.password', 'Database password'),
-	createTextInput('project.database.rootPassword', 'Database root password'),
-	createTextInput('project.webserver.port', 'Webserver port'),
+	createTextInput('project.database.name', 'Database name', '', undefined, isRequired),
+	createTextInput('project.database.user', 'Database user', '', undefined, isRequired),
+	createTextInput('project.database.password', 'Database password', '', undefined, isRequired),
+	createTextInput('project.database.rootPassword', 'Database root password', '', undefined, isRequired),
+	createTextInput('project.webserver.port', 'Webserver port', '', undefined, isRequired),
 ]
 
-/// CliForm
+/// Generate new wordpress project from template
 const CliForm = () => {
 	const [activeField, setActiveField] = React.useState(0)
 	const [submission, setSubmission] = React.useState()
