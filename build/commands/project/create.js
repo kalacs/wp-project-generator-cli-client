@@ -256,13 +256,185 @@ function Error({
     red: true
   }, children));
 }
-},{}],"project/create.js":[function(require,module,exports) {
+},{}],"../services/http-client.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = CliForm;
+exports.default = makeClient;
+
+var _axios = _interopRequireDefault(require("axios"));
+
+var _axiosEndpoints = _interopRequireDefault(require("axios-endpoints"));
+
+var _qs = _interopRequireDefault(require("qs"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function makeClient({
+  user,
+  password,
+  baseURL,
+  logger
+}) {
+  const axiosInstance = _axios.default.create({
+    baseURL,
+    paramsSerializer: function (params) {
+      return _qs.default.stringify(params);
+    }
+  });
+
+  const Endpoint = (0, _axiosEndpoints.default)(axiosInstance);
+  const authEndpoint = new Endpoint('/auth/login');
+  const TWO_PARAM_METHODS = ['post', 'put', 'patch'];
+
+  const createAuthHeader = token => ({
+    'Authorization': `Bearer ${token}`
+  });
+
+  const decorateEnpointParams = (params, paramIndex, headers) => {
+    const paramsCopy = params.slice(0);
+    const [options] = paramsCopy.slice(paramIndex);
+    if (!options) paramsCopy.splice(paramIndex, 1, {
+      headers: headers
+    });else paramsCopy.splice(paramIndex, 1, Object.assign({}, options, {
+      headers: headers
+    }));
+    return paramsCopy;
+  };
+
+  logger.trace({
+    axiosInstance
+  }, 'axios client');
+  return {
+    authToken: null,
+
+    async login() {
+      return await authEndpoint.post({
+        email: user,
+        password
+      });
+    },
+
+    makeEndpointWithAuth(path) {
+      logger.trace({
+        path
+      }, 'makeEndpointWithAuth');
+      const client = this;
+      const endpoint = new Endpoint(path);
+      const authorizationHandler = {
+        get(target, propKey) {
+          const origProperty = target[propKey];
+          logger.trace({
+            origProperty
+          }, 'Trap function call in endpoint');
+
+          if (typeof origProperty !== 'function') {
+            return origProperty;
+          }
+
+          return async function (...args) {
+            const optionParamIndex = TWO_PARAM_METHODS.indexOf(origProperty) > -1 ? 1 : 0;
+            const params = decorateEnpointParams(args, optionParamIndex, createAuthHeader(client.authToken));
+            logger.trace({
+              optionParamIndex,
+              params
+            }, 'Call params');
+
+            try {
+              const response = await origProperty.apply(this, params);
+              const {
+                status
+              } = response;
+              logger.info({
+                status
+              }, 'Http client response status');
+              return response;
+            } catch (error) {
+              logger.error({
+                error
+              }, 'Http client error');
+
+              if (!error.response || error.response.status !== 401) {
+                throw error;
+              }
+
+              const {
+                status
+              } = error.response;
+
+              try {
+                logger.trace({
+                  status
+                }, 'Try to sign in');
+                const {
+                  data: {
+                    token
+                  }
+                } = await client.login();
+                client.authToken = token;
+                logger.trace({
+                  token
+                }, 'Token');
+                logger.trace('Run request after login');
+                const response = await origProperty.apply(this, decorateEnpointParams(params, optionParamIndex, createAuthHeader(client.authToken)));
+                logger.info({
+                  status
+                }, 'Http client secodresponse status');
+                return response;
+              } catch (error) {
+                logger.error({
+                  error
+                }, 'Login error');
+                throw error;
+              }
+            }
+          };
+        }
+
+      };
+      return new Proxy(endpoint, authorizationHandler);
+    }
+
+  };
+}
+},{}],"../services/wp-manager-client.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createWPManagerClient;
+
+var _httpClient = _interopRequireDefault(require("./http-client"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function createWPManagerClient({
+  user,
+  password,
+  baseURL,
+  logger
+}) {
+  const client = (0, _httpClient.default)({
+    user,
+    password,
+    baseURL,
+    logger
+  });
+  const projectsEndpoint = client.makeEndpointWithAuth('/wordpress-project');
+  return {
+    createWordpressProject: async params => await projectsEndpoint.post(params)
+  };
+}
+},{"./http-client":"../services/http-client.js"}],"project/create.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -280,9 +452,22 @@ var _Error = _interopRequireDefault(require("../../components/Error"));
 
 var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
 
+var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+const wpManagerClient = (0, _wpManagerClient.default)({
+  user: 'test',
+  password: 'test',
+  baseURL: 'http://127.0.0.1:3000',
+  logger: {
+    trace: console.log,
+    info: console.log,
+    error: console.error
+  }
+});
 
 const createTextInput = (name, label, placeholder = '', format = value => value || '', validate = () => undefined) => ({
   name,
@@ -311,61 +496,22 @@ const createMultiSelectInput = (name, label, inputConfig, format = value => valu
   Input: _MultiSelectInput.default
 });
 
-const fields = [createTextInput('prefix', 'Project prefix', 'my-awesome-project', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', value => !value ? 'Require' : undefined), createTextInput('path', 'Project path', '/home/user/localSites', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', value => !value ? 'Require' : undefined), createTextInput('databaseName', 'Database name'), createTextInput('databaseUser', 'Database user'), createTextInput('databasePassword', 'Database password'), createTextInput('databaseRootPassword', 'Database root password'), createTextInput('webserverPort', 'Webserver port'), createSelectInput('language', 'Language', {
-  items: [{
-    label: 'Javascript',
-    value: 'javascript'
-  }, {
-    label: 'Typescript',
-    value: 'typescript'
-  }]
-}), createMultiSelectInput('techno', 'Technolo', {
-  items: [{
-    label: '⚛️ React',
-    value: 'react'
-  }, {
-    label: 'Angular',
-    value: 'angular'
-  }, {
-    label: 'Redux',
-    value: 'redux'
-  }, {
-    label: 'GraphQL',
-    value: 'graphql'
-  }, {
-    label: '🏁 React-Final-Form',
-    value: 'react-final-form'
-  }, {
-    label: '💅 Styled Components',
-    value: 'styled-components'
-  }, {
-    label: '👨‍🎤 Emotion',
-    value: 'emotion'
-  }, {
-    label: '🌈‍ Ink',
-    value: 'ink'
-  }]
-})]; /// CliForm
+const fields = [createTextInput('project.prefix', 'Project prefix', 'my-awesome-project', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', value => !value ? 'Require' : undefined), createTextInput('project.path', 'Project path', '/home/user/localSites', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', value => !value ? 'Require' : undefined), createTextInput('project.database.name', 'Database name'), createTextInput('project.database.user', 'Database user'), createTextInput('project.database.password', 'Database password'), createTextInput('project.database.rootPassword', 'Database root password'), createTextInput('project.webserver.port', 'Webserver port')]; /// CliForm
 
-function CliForm() {
+const CliForm = () => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
   const [submission, setSubmission] = _react.default.useState();
 
-  return submission ? _react.default.createElement(_ink.AppContext.Consumer, null, ({
-    exit
-  }) => {
-    setTimeout(exit);
-    return _react.default.createElement(_ink.Box, {
-      flexDirection: "column",
-      marginTop: 1
-    }, _react.default.createElement(_ink.Color, {
-      blue: true
-    }, _react.default.createElement(_ink.Text, {
-      bold: true
-    }, "Values submitted:")), _react.default.createElement(_ink.Box, null, JSON.stringify(submission, undefined, 2)));
-  }) : _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: setSubmission
+  const [isLoading, setIsLoading] = _react.default.useState(false);
+
+  return _react.default.createElement(_reactFinalForm.Form, {
+    onSubmit: async params => {
+      setIsLoading(true);
+      await wpManagerClient.createWordpressProject(params);
+      setSubmission(params);
+      setIsLoading(false);
+    }
   }, ({
     handleSubmit,
     validating
@@ -421,7 +567,16 @@ function CliForm() {
     marginLeft: 2
   }, _react.default.createElement(_ink.Color, {
     green: true
-  }, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error))))));
-}
-},{"../../components/TextInput":"../components/TextInput.js","../../components/SelectInput":"../components/SelectInput.js","../../components/MultiSelectInput":"../components/MultiSelectInput.js","../../components/Error":"../components/Error.js"}]},{},["project/create.js"], null)
+  }, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error)))), submission ? isLoading ? _react.default.createElement(_ink.Box, {
+    marginLeft: 1
+  }, _react.default.createElement(_ink.Color, {
+    yellow: true
+  }, _react.default.createElement(_inkSpinner.default, {
+    type: "dots"
+  }))) : 'Sent to server' : ''));
+};
+
+var _default = CliForm;
+exports.default = _default;
+},{"../../components/TextInput":"../components/TextInput.js","../../components/SelectInput":"../components/SelectInput.js","../../components/MultiSelectInput":"../components/MultiSelectInput.js","../../components/Error":"../components/Error.js","../../services/wp-manager-client":"../services/wp-manager-client.js"}]},{},["project/create.js"], null)
 //# sourceMappingURL=/project/create.js.map
