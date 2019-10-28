@@ -6,7 +6,7 @@
 ## Install
 
 ```bash
-$ npm install wp-manager-cli
+$ npm i && npm run dev
 ```
 
 
