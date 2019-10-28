@@ -1,11 +1,23 @@
 import React from 'react'
 import { Form, Field } from 'react-final-form'
-import { AppContext, Box, Color, Text } from 'ink'
+import { Box, Color, Text } from 'ink'
 import TextInput from '../../components/TextInput'
 import SelectInput from '../../components/SelectInput'
 import MultiSelectInput from '../../components/MultiSelectInput'
 import Error from '../../components/Error'
 import Spinner from 'ink-spinner'
+import createWPManagerClient from '../../services/wp-manager-client';
+
+const wpManagerClient = createWPManagerClient({
+    user: 'test',
+    password: 'test',
+    baseURL: 'http://127.0.0.1:3000',
+    logger: {
+		trace: console.log,
+		info: console.log,
+		error: console.error
+	}
+  });
 
 const createTextInput = (name, label, placeholder = '', format = value => value || '', validate = () => undefined) => ({
 	name,
@@ -36,7 +48,7 @@ const createMultiSelectInput = (name, label, inputConfig, format = value => valu
 
 const fields = [
 	createTextInput(
-		'prefix',
+		'project.prefix',
 		'Project prefix',
 		'my-awesome-project',
 		value => value ? value
@@ -47,7 +59,7 @@ const fields = [
 		value => !value ? 'Require' : undefined
 	),
 	createTextInput(
-		'path',
+		'project.path',
 		'Project path',
 		'/home/user/localSites',
 		value => value ? value
@@ -57,51 +69,26 @@ const fields = [
 						: '',
 		value => !value ? 'Require' : undefined
 	),
-	createTextInput('databaseName', 'Database name'),
-	createTextInput('databaseUser', 'Database user'),
-	createTextInput('databasePassword', 'Database password'),
-	createTextInput('databaseRootPassword', 'Database root password'),
-	createTextInput('webserverPort', 'Webserver port'),
-	createSelectInput('language', 'Language', {
-		items: [
-			{ label: 'Javascript', value: 'javascript' },
-			{ label: 'Typescript', value: 'typescript' }
-		]
-	}),
-	createMultiSelectInput('techno', 'Technolo', {
-		items: [
-			{ label: '⚛️ React', value: 'react' },
-			{ label: 'Angular', value: 'angular' },
-			{ label: 'Redux', value: 'redux' },
-			{ label: 'GraphQL', value: 'graphql' },
-			{ label: '🏁 React-Final-Form', value: 'react-final-form' },
-			{ label: '💅 Styled Components', value: 'styled-components' },
-			{ label: '👨‍🎤 Emotion', value: 'emotion' },
-			{ label: '🌈‍ Ink', value: 'ink' }
-		]
-	}),
+	createTextInput('project.database.name', 'Database name'),
+	createTextInput('project.database.user', 'Database user'),
+	createTextInput('project.database.password', 'Database password'),
+	createTextInput('project.database.rootPassword', 'Database root password'),
+	createTextInput('project.webserver.port', 'Webserver port'),
 ]
 
 /// CliForm
-export default function CliForm() {
+const CliForm = () => {
 	const [activeField, setActiveField] = React.useState(0)
 	const [submission, setSubmission] = React.useState()
-	return submission ? (
-		<AppContext.Consumer>
-			{({ exit }) => {
-				setTimeout(exit)
-				return (
-					<Box flexDirection="column" marginTop={1}>
-						<Color blue>
-							<Text bold>Values submitted:</Text>
-						</Color>
-						<Box>{JSON.stringify(submission, undefined, 2)}</Box>
-					</Box>
-				)
-			}}
-		</AppContext.Consumer>
-	) : (
-		<Form onSubmit={setSubmission}>
+	const [isLoading, setIsLoading] = React.useState(false)
+
+	return (
+		<Form onSubmit={async params => {
+			setIsLoading(true);
+			await wpManagerClient.createWordpressProject(params);
+			setSubmission(params);
+			setIsLoading(false);
+		}}>
 			{({ handleSubmit, validating }) => (
 				<Box flexDirection="column">
 					{fields.map(
@@ -167,8 +154,10 @@ export default function CliForm() {
 							</Field>
 						)
 					)}
+				{submission ? (isLoading ? 	<Box marginLeft={1}><Color yellow><Spinner type="dots" /></Color></Box>  : 'Sent to server'):''}
 				</Box>
 			)}
 		</Form>
 	)
 }
+export default CliForm;
