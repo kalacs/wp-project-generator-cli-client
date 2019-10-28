@@ -124,6 +124,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = makeClient;
+exports.getConfig = void 0;
 
 var _axios = _interopRequireDefault(require("axios"));
 
@@ -132,6 +133,19 @@ var _axiosEndpoints = _interopRequireDefault(require("axios-endpoints"));
 var _qs = _interopRequireDefault(require("qs"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const getConfig = () => ({
+  user: 'test',
+  password: 'test',
+  baseURL: 'http://127.0.0.1:3000',
+  logger: {
+    trace: () => {},
+    info: () => {},
+    error: () => {}
+  }
+});
+
+exports.getConfig = getConfig;
 
 function makeClient({
   user,
@@ -270,6 +284,8 @@ exports.default = createWPManagerClient;
 
 var _httpClient = _interopRequireDefault(require("../services/http-client"));
 
+var _q = require("q");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function createWPManagerClient({
@@ -286,7 +302,11 @@ function createWPManagerClient({
   });
   const projectsEndpoint = client.makeEndpointWithAuth('/wordpress-project');
   return {
-    createWordpressProject: async params => await projectsEndpoint.post(params)
+    createWordpressProject: params => projectsEndpoint.post(params),
+    getProjectServicesStatuses: name => {
+      const projectServicesEndpoint = client.makeEndpointWithAuth(`/wordpress-project/${name}/services`);
+      return projectServicesEndpoint.get();
+    }
   };
 }
 },{"../services/http-client":"../services/http-client.js"}],"../components/TextInput.js":[function(require,module,exports) {

@@ -15,7 +15,7 @@ const wpManagerClient = createWPManagerClient({
 		info: () => {},
 		error: () => {}
 	}
-  });
+});
 const isRequired = value => !value ? 'Required' : undefined; 
 
 const fields = [

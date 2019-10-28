@@ -2,6 +2,17 @@ import axios from 'axios';
 import { default as EndpointFactory } from 'axios-endpoints';
 import qs from 'qs';
 
+export const getConfig = () => ({
+    user: 'test',
+    password: 'test',
+    baseURL: 'http://127.0.0.1:3000',
+    logger: {
+		trace: () => {},
+		info: () => {},
+		error: () => {}
+	}
+});
+
 export default function makeClient({
     user,
     password,
