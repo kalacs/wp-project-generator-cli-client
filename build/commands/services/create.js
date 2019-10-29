@@ -341,7 +341,7 @@ const LoadingIndictor = ({
 
 var _default = LoadingIndictor;
 exports.default = _default;
-},{}],"services/destroy.js":[function(require,module,exports) {
+},{}],"services/create.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -367,9 +367,9 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)()); /// Destroy services
+const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)()); /// Create services
 
-const Destroy = ({
+const Create = ({
   name
 }) => {
   const [isLoading, setIsLoading] = (0, _react.useState)();
@@ -380,7 +380,7 @@ const Destroy = ({
         setIsLoading(true);
         const {
           status
-        } = await wpManagerClient.destroyProjectServices(name);
+        } = await wpManagerClient.createProjectServices(name);
         setIsLoading(false);
         setResponse(status);
       } catch (error) {
@@ -400,11 +400,11 @@ const Destroy = ({
   }, _react.default.createElement(_ink.Text, null, response)) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "There is no data")));
 };
 
-Destroy.propTypes = {
+Create.propTypes = {
   /// Name of the project
   name: _propTypes.default.string.isRequired
 };
-var _default = Destroy;
+var _default = Create;
 exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../services/http-client":"../services/http-client.js","../../components/LoadingIndicator":"../components/LoadingIndicator.js"}]},{},["services/destroy.js"], null)
-//# sourceMappingURL=/services/destroy.js.map
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../services/http-client":"../services/http-client.js","../../components/LoadingIndicator":"../components/LoadingIndicator.js"}]},{},["services/create.js"], null)
+//# sourceMappingURL=/services/create.js.map
