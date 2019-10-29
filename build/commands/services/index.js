@@ -284,8 +284,6 @@ exports.default = createWPManagerClient;
 
 var _httpClient = _interopRequireDefault(require("../services/http-client"));
 
-var _q = require("q");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function createWPManagerClient({
@@ -309,7 +307,57 @@ function createWPManagerClient({
     }
   };
 }
-},{"../services/http-client":"../services/http-client.js"}],"services/index.js":[function(require,module,exports) {
+},{"../services/http-client":"../services/http-client.js"}],"../components/Table.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _ink = require("ink");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const Table = ({
+  data
+}) => {
+  return _react.default.createElement(_ink.Box, null, data && data.length > 0 ? _react.default.createElement(_ink.Box, {
+    flexDirection: "column"
+  }, _react.default.createElement(_ink.Box, {
+    flexDirection: "row"
+  }, Object.keys(data[0]).map((header, index) => _react.default.createElement(_ink.Box, {
+    key: `header-${index}`,
+    marginRight: 2,
+    flexGrow: 1
+  }, _react.default.createElement(_ink.Color, {
+    blue: true
+  }, _react.default.createElement(_ink.Text, null, header.toUpperCase()))))), _react.default.createElement(_ink.Box, {
+    flexDirection: "column"
+  }, data.map((row, index) => {
+    return _react.default.createElement(_ink.Box, {
+      key: `row-${index}`,
+      flexDirection: "row",
+      flexGrow: 1
+    }, Object.values(row).map((cell, index) => {
+      return _react.default.createElement(_ink.Box, {
+        key: `cell-${index}`,
+        marginRight: 2,
+        justifyContent: "flex-start"
+      }, _react.default.createElement(_ink.Text, null, cell));
+    }));
+  }))) : _react.default.createElement(_ink.Color, {
+    white: true
+  }, _react.default.createElement(_ink.Text, null, "No data")));
+};
+
+var _default = Table;
+exports.default = _default;
+},{}],"services/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -329,6 +377,10 @@ var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager
 
 var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
 
+var _Table = _interopRequireDefault(require("../../components/Table"));
+
+var _chalk = _interopRequireDefault(require("chalk"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
@@ -341,16 +393,29 @@ const ServiceIndex = ({
   name
 }) => {
   const [isLoading, setIsLoading] = (0, _react.useState)();
-  const [data, setData] = (0, _react.useState)('');
+  const [data, setData] = (0, _react.useState)([]);
   (0, _react.useEffect)(() => {
     async function fetch() {
       try {
         setIsLoading(true);
         const {
-          data: {
-            out: result
-          }
+          data
         } = await wpManagerClient.getProjectServicesStatuses(name);
+        const result = data.map(({
+          names,
+          ports: rawPorts,
+          status: rawStatus
+        }) => {
+          const status = /Up/.test(rawStatus) ? _chalk.default.green('●') : _chalk.default.red('●');
+
+          const ports = rawPorts || _chalk.default.italic('None');
+
+          return {
+            names,
+            ports,
+            status
+          };
+        });
         setIsLoading(false);
         setData(result);
       } catch (error) {
@@ -362,14 +427,19 @@ const ServiceIndex = ({
     fetch();
   }, [name]);
   return _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
+    flexDirection: "column",
+    width: "5000"
   }, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
     bold: true
   }, "Fetching data from server "), _react.default.createElement(_ink.Color, {
     green: true
   }, _react.default.createElement(_inkSpinner.default, {
     type: "point"
-  }))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "Request completed ")), data ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, data)) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "''")));
+  }))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "Request completed ")), data ? _react.default.createElement(_ink.Box, {
+    width: "100%"
+  }, _react.default.createElement(_Table.default, {
+    data: data
+  })) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "There is no data")));
 };
 
 ServiceIndex.propTypes = {
@@ -378,5 +448,5 @@ ServiceIndex.propTypes = {
 };
 var _default = ServiceIndex;
 exports.default = _default;
-},{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js"}]},{},["services/index.js"], null)
+},{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/Table":"../components/Table.js"}]},{},["services/index.js"], null)
 //# sourceMappingURL=/services/index.js.map

@@ -1,5 +1,4 @@
 import makeClient from '../services/http-client';
-import { async } from 'q';
 
 export default function createWPManagerClient({
     user,

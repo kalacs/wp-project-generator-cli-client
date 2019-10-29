@@ -1,22 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Text, Box, Color } from 'ink';
+import { Text, Box, Color, render } from 'ink';
 import { getConfig } from '../../services/http-client';
 import createWPManagerClient from '../../services/wp-manager-client';
 import Spinner from 'ink-spinner';
+import Table from '../../components/Table';
+import chalk from 'chalk';
 
 const wpManagerClient = createWPManagerClient(getConfig());
 
 /// Get services statuses
 const ServiceIndex = ({ name }) => {
 	const [ isLoading, setIsLoading ] = useState();
-	const [ data, setData] = useState('');
+	const [ data, setData] = useState([]);
 
 	useEffect(() => {
 		async function fetch() {
 			try {
 				setIsLoading(true);
-				const { data: { out: result } } = await wpManagerClient.getProjectServicesStatuses(name)
+				const { data } = await wpManagerClient.getProjectServicesStatuses(name)
+				const result = data.map(({ names, ports: rawPorts, status: rawStatus }) => {
+					const status = /Up/.test(rawStatus) ? chalk.green('●') : chalk.red('●');
+					const ports = rawPorts || chalk.italic('None');
+					return {
+						names,
+						ports,
+						status
+					};
+				});
 				setIsLoading(false);
 				setData(result);
 			} catch (error) {
@@ -28,7 +39,7 @@ const ServiceIndex = ({ name }) => {
 	}, [name]);
 
 	return (
-		<Box flexDirection="column">
+		<Box flexDirection="column" width="5000">
 			{
 				isLoading
 				?
@@ -44,12 +55,12 @@ const ServiceIndex = ({ name }) => {
 			{
 				data
 				?
-				<Box>
-					<Text>{data}</Text>
+				<Box width="100%">
+					<Table data={data} />
 				</Box>
 				:
 				<Box>
-					<Text>''</Text>
+					<Text>There is no data</Text>
 				</Box>
 			}
 		</Box>

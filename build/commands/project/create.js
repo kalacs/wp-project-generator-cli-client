@@ -284,8 +284,6 @@ exports.default = createWPManagerClient;
 
 var _httpClient = _interopRequireDefault(require("../services/http-client"));
 
-var _q = require("q");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function createWPManagerClient({
