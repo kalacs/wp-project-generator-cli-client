@@ -561,7 +561,7 @@ const FormField = ({
 
 var _default = FormField;
 exports.default = _default;
-},{"../components/Error":"../components/Error.js"}],"project/create.js":[function(require,module,exports) {
+},{"../components/Error":"../components/Error.js"}],"../components/LoadingIndicator.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -569,13 +569,43 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _react = _interopRequireDefault(require("react"));
-
-var _reactFinalForm = require("react-final-form");
+var _react = _interopRequireWildcard(require("react"));
 
 var _ink = require("ink");
 
 var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const LoadingIndictor = ({
+  isLoading
+}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
+  bold: true
+}, "Fetching data from server "), _react.default.createElement(_ink.Color, {
+  green: true
+}, _react.default.createElement(_inkSpinner.default, {
+  type: "point"
+}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "Request completed ")));
+
+var _default = LoadingIndictor;
+exports.default = _default;
+},{}],"services-wordpress/install.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _reactFinalForm = require("react-final-form");
+
+var _ink = require("ink");
 
 var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
 
@@ -583,7 +613,13 @@ var _fieldCreators = require("../../utils/factories/field-creators");
 
 var _FormField = _interopRequireDefault(require("../../components/FormField"));
 
+var _LoadingIndicator = _interopRequireDefault(require("../../components/LoadingIndicator"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
@@ -600,21 +636,28 @@ const wpManagerClient = (0, _wpManagerClient.default)({
 
 const isRequired = value => !value ? 'Required' : undefined;
 
-const fields = [(0, _fieldCreators.createTextInput)('project.prefix', 'Project prefix', 'my-awesome-project', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', isRequired), (0, _fieldCreators.createTextInput)('project.database.name', 'Database name', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.user', 'Database user', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.password', 'Database password', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.rootPassword', 'Database root password', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.webserver.port', 'Webserver port', '', undefined, isRequired)]; /// Generate new wordpress project from template
+const noFormatNoPlaceholderRequired = (name, label) => [name, label, '', undefined, isRequired];
 
-const CliForm = () => {
+const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('projectPrefix', 'Project name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('container', 'Container name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('network', 'Network name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('url', 'WP Url')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('title', 'Title')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminName', 'Admin name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminPassword', 'Admin password')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminEmail', 'Admin email'))]; /// Install generated and started wordpress
+
+const Install = () => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
-  const [submission, setSubmission] = _react.default.useState();
+  const [status, setStatus] = _react.default.useState(0);
 
   const [isLoading, setIsLoading] = _react.default.useState(false);
 
+  const [isSubmitted, setIsSubmitted] = _react.default.useState(false);
+
   return _react.default.createElement(_reactFinalForm.Form, {
     onSubmit: async params => {
+      setIsSubmitted(true);
       setIsLoading(true);
-      await wpManagerClient.createWordpressProject(params);
-      setSubmission(params);
+      const {
+        status
+      } = await wpManagerClient.installProjectServiceWordpress(params);
       setIsLoading(false);
+      setStatus(status);
     }
   }, ({
     handleSubmit,
@@ -655,16 +698,14 @@ const CliForm = () => {
         input.onBlur(); // mark as touched to show error
       }
     }
-  }))), submission ? isLoading ? _react.default.createElement(_ink.Box, {
-    marginLeft: 1
-  }, _react.default.createElement(_ink.Color, {
-    yellow: true
-  }, _react.default.createElement(_inkSpinner.default, {
-    type: "dots"
-  }))) : 'Sent to server' : ''));
+  }))), isSubmitted ? _react.default.createElement(_react.Fragment, null, _react.default.createElement(_LoadingIndicator.default, {
+    isLoading: isLoading
+  }), status ? _react.default.createElement(_ink.Box, {
+    width: "100%"
+  }, _react.default.createElement(_ink.Text, null, status)) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "No response yet"))) : ''));
 };
 
-var _default = CliForm;
+var _default = Install;
 exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js"}]},{},["project/create.js"], null)
-//# sourceMappingURL=/project/create.js.map
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../components/LoadingIndicator":"../components/LoadingIndicator.js"}]},{},["services-wordpress/install.js"], null)
+//# sourceMappingURL=/services-wordpress/install.js.map

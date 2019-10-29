@@ -79,6 +79,21 @@
 					"subCommands": []
 				}
 			]
+		},
+		{
+			"path": "services-wordpress/index.js",
+			"name": "services-wordpress",
+			"description": "Wordpress commands",
+			"args": [],
+			"subCommands": [
+				{
+					"path": "services-wordpress/install.js",
+					"name": "install",
+					"description": "Install generated and started wordpress",
+					"args": [],
+					"subCommands": []
+				}
+			]
 		}
 	]
 }
