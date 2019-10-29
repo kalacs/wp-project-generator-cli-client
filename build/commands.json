@@ -47,6 +47,22 @@
 			],
 			"subCommands": [
 				{
+					"path": "services/create.js",
+					"name": "create",
+					"description": "Create services",
+					"args": [
+						{
+							"key": "name",
+							"type": "string",
+							"description": "Name of the project",
+							"isRequired": true,
+							"aliases": [],
+							"positional": false
+						}
+					],
+					"subCommands": []
+				},
+				{
 					"path": "services/destroy.js",
 					"name": "destroy",
 					"description": "Destroy services",
