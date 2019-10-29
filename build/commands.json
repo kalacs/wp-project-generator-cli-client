@@ -45,7 +45,24 @@
 					"positional": false
 				}
 			],
-			"subCommands": []
+			"subCommands": [
+				{
+					"path": "services/destroy.js",
+					"name": "destroy",
+					"description": "Destroy services",
+					"args": [
+						{
+							"key": "name",
+							"type": "string",
+							"description": "Name of the project",
+							"isRequired": true,
+							"aliases": [],
+							"positional": false
+						}
+					],
+					"subCommands": []
+				}
+			]
 		}
 	]
 }
