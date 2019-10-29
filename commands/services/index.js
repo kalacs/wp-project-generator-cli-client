@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { Text, Box, Color, render } from 'ink';
 import { getConfig } from '../../services/http-client';
 import createWPManagerClient from '../../services/wp-manager-client';
-import Spinner from 'ink-spinner';
 import Table from '../../components/Table';
 import chalk from 'chalk';
+import LoadingIndictor from '../../components/LoadingIndicator';
 
 const wpManagerClient = createWPManagerClient(getConfig());
 
@@ -40,18 +40,7 @@ const ServiceIndex = ({ name }) => {
 
 	return (
 		<Box flexDirection="column" width="5000">
-			{
-				isLoading
-				?
-				<Box>
-					<Text bold>Fetching data from server </Text>
-					<Color green><Spinner type="point" /></Color>
-				</Box>
-				:
-				<Box>
-					<Text>Request completed </Text>
-				</Box>
-			}
+			<LoadingIndictor isLoading={isLoading}/>
 			{
 				data
 				?
