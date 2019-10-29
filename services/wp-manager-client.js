@@ -1,5 +1,4 @@
-import makeClient from './http-client';
-
+import makeClient from '../services/http-client';
 
 export default function createWPManagerClient({
     user,
@@ -16,6 +15,10 @@ export default function createWPManagerClient({
       const projectsEndpoint = client.makeEndpointWithAuth('/wordpress-project');
 
     return {
-        createWordpressProject: async (params) => await projectsEndpoint.post(params),
+        createWordpressProject: params => projectsEndpoint.post(params),
+        getProjectServicesStatuses: name => {
+          const projectServicesEndpoint = client.makeEndpointWithAuth(`/wordpress-project/${name}/services`);
+          return projectServicesEndpoint.get();
+        }
     }
 }

@@ -25,11 +25,27 @@
 				{
 					"path": "project/create.js",
 					"name": "create",
-					"description": "CliForm",
+					"description": "Generate new wordpress project from template",
 					"args": [],
 					"subCommands": []
 				}
 			]
+		},
+		{
+			"path": "services/index.js",
+			"name": "services",
+			"description": "Get services statuses",
+			"args": [
+				{
+					"key": "name",
+					"type": "string",
+					"description": "Name of the project",
+					"isRequired": true,
+					"aliases": [],
+					"positional": false
+				}
+			],
+			"subCommands": []
 		}
 	]
 }
