@@ -28,6 +28,13 @@
 					"description": "Generate new wordpress project from template",
 					"args": [],
 					"subCommands": []
+				},
+				{
+					"path": "project/kickstart.js",
+					"name": "kickstart",
+					"description": "Kickstart project",
+					"args": [],
+					"subCommands": []
 				}
 			]
 		},
@@ -47,9 +54,9 @@
 			],
 			"subCommands": [
 				{
-					"path": "services/destroy.js",
-					"name": "destroy",
-					"description": "Destroy services",
+					"path": "services/create.js",
+					"name": "create",
+					"description": "Create services",
 					"args": [
 						{
 							"key": "name",
@@ -63,9 +70,9 @@
 					"subCommands": []
 				},
 				{
-					"path": "services/create.js",
-					"name": "create",
-					"description": "Create services",
+					"path": "services/destroy.js",
+					"name": "destroy",
+					"description": "Destroy services",
 					"args": [
 						{
 							"key": "name",

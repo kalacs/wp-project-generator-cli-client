@@ -117,7 +117,124 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../services/http-client.js":[function(require,module,exports) {
+})({"../components/LoadingIndicator.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _ink = require("ink");
+
+var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const LoadingIndicator = ({
+  isLoading,
+  loadingMessage = 'Fetching data from server'
+}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
+  bold: true
+}, loadingMessage), _react.default.createElement(_ink.Color, {
+  green: true
+}, _react.default.createElement(_inkSpinner.default, {
+  type: "point"
+}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, " ")));
+
+LoadingIndicator.propTypes = {
+  isLoading: _propTypes.default.bool.isRequired,
+  loadingMessage: _propTypes.default.string.isRequired
+};
+var _default = LoadingIndicator;
+exports.default = _default;
+},{}],"../components/Fetcher.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+var _ink = require("ink");
+
+var _LoadingIndicator = _interopRequireDefault(require("./LoadingIndicator"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const DisplayData = ({
+  data
+}) => _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
+
+const DisplayError = ({
+  error
+}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
+  red: true
+}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
+
+const Fetcher = ({
+  beforeLoadingMessage,
+  DataDisplayer = DisplayData,
+  ErrorDisplayer = DisplayError,
+  fetchData,
+  dataMapper = data => data,
+  errorHandler = error => error.toString()
+}) => {
+  const [isLoading, setIsLoading] = (0, _react.useState)(false);
+  const [data, setData] = (0, _react.useState)(undefined);
+  const [error, setError] = (0, _react.useState)('');
+  (0, _react.useEffect)(() => {
+    async function fetch() {
+      try {
+        setIsLoading(true);
+        const response = await fetchData.call();
+        setIsLoading(false);
+        setData(dataMapper(response));
+      } catch (error) {
+        setIsLoading(false);
+        setData(' ');
+        setError(errorHandler(error));
+      }
+    }
+
+    fetch();
+  }, [fetchData]);
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
+    isLoading: isLoading,
+    loadingMessage: beforeLoadingMessage
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
+    data: data
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
+    error: error
+  })));
+};
+
+Fetcher.propTypes = {
+  afterLoadingMessage: _propTypes.default.string,
+  beforeLoadingMessage: _propTypes.default.string,
+  fetchData: _propTypes.default.func.isRequired,
+  dataMapper: _propTypes.default.func,
+  errorHandler: _propTypes.default.func
+};
+var _default = Fetcher;
+exports.default = _default;
+},{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"../services/http-client.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -584,7 +701,7 @@ var _reactFinalForm = require("react-final-form");
 
 var _ink = require("ink");
 
-var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
+var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
 
 var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
 
@@ -611,20 +728,15 @@ const isRequired = value => !value ? 'Required' : undefined;
 
 const fields = [(0, _fieldCreators.createTextInput)('project.prefix', 'Project prefix', 'my-awesome-project', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', isRequired), (0, _fieldCreators.createTextInput)('project.database.name', 'Database name', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.user', 'Database user', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.password', 'Database password', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.rootPassword', 'Database root password', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.webserver.port', 'Webserver port', '', undefined, isRequired)]; /// Generate new wordpress project from template
 
-const CliForm = () => {
+const Generate = () => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
   const [submission, setSubmission] = _react.default.useState();
 
-  const [isLoading, setIsLoading] = _react.default.useState(false);
-
-  return _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: async params => {
-      setIsLoading(true);
-      await wpManagerClient.createWordpressProject(params);
-      setSubmission(params);
-      setIsLoading(false);
-    }
+  return _react.default.createElement(_ink.Box, {
+    flexDirection: "column"
+  }, _react.default.createElement(_reactFinalForm.Form, {
+    onSubmit: setSubmission
   }, ({
     handleSubmit,
     validating
@@ -664,16 +776,16 @@ const CliForm = () => {
         input.onBlur(); // mark as touched to show error
       }
     }
-  }))), submission ? isLoading ? _react.default.createElement(_ink.Box, {
-    marginLeft: 1
-  }, _react.default.createElement(_ink.Color, {
-    yellow: true
-  }, _react.default.createElement(_inkSpinner.default, {
-    type: "dots"
-  }))) : 'Sent to server' : ''));
+  }))))), submission ? _react.default.createElement(_Fetcher.default, {
+    fetchData: wpManagerClient.createWordpressProject.bind(null, submission),
+    beforeLoadingMessage: `Generating project: "${submission.project.prefix}"`,
+    dataMapper: ({
+      status
+    }) => status === 200 ? 'Project structure has been created' : 'Something went wrong'
+  }) : '');
 };
 
-var _default = CliForm;
+var _default = Generate;
 exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js"}]},{},["project/create.js"], null)
+},{"../../components/Fetcher":"../components/Fetcher.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js"}]},{},["project/create.js"], null)
 //# sourceMappingURL=/project/create.js.map

@@ -44,7 +44,7 @@ const Fetcher = ({
 		fetch();
 	}, [fetchData]);
 
-	return (
+    return (
         <Fragment>
             <Box>
 			<LoadingIndicator
