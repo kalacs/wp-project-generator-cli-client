@@ -47,6 +47,22 @@
 			],
 			"subCommands": [
 				{
+					"path": "services/destroy.js",
+					"name": "destroy",
+					"description": "Destroy services",
+					"args": [
+						{
+							"key": "name",
+							"type": "string",
+							"description": "Name of the project",
+							"isRequired": true,
+							"aliases": [],
+							"positional": false
+						}
+					],
+					"subCommands": []
+				},
+				{
 					"path": "services/create.js",
 					"name": "create",
 					"description": "Create services",
@@ -63,9 +79,25 @@
 					"subCommands": []
 				},
 				{
-					"path": "services/destroy.js",
-					"name": "destroy",
-					"description": "Destroy services",
+					"path": "services/start.js",
+					"name": "start",
+					"description": "Start services",
+					"args": [
+						{
+							"key": "name",
+							"type": "string",
+							"description": "Name of the project",
+							"isRequired": true,
+							"aliases": [],
+							"positional": false
+						}
+					],
+					"subCommands": []
+				},
+				{
+					"path": "services/stop.js",
+					"name": "stop",
+					"description": "Stop services",
 					"args": [
 						{
 							"key": "name",

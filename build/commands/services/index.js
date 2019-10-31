@@ -307,6 +307,15 @@ function createWPManagerClient({
     },
     destroyProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).delete(),
     createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({}),
+    startProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
+      command: 'restart'
+    }),
+    stopProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
+      command: 'stop'
+    }),
+    createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
+      command: 'up'
+    }),
     installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params)
   };
 }
@@ -374,25 +383,110 @@ var _ink = require("ink");
 
 var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
 
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-const LoadingIndictor = ({
-  isLoading
+const LoadingIndicator = ({
+  isLoading,
+  loadingMessage = 'Fetching data from server'
 }) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
   bold: true
-}, "Fetching data from server "), _react.default.createElement(_ink.Color, {
+}, loadingMessage), _react.default.createElement(_ink.Color, {
   green: true
 }, _react.default.createElement(_inkSpinner.default, {
   type: "point"
-}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "Request completed ")));
+}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, " ")));
 
-var _default = LoadingIndictor;
+LoadingIndicator.propTypes = {
+  isLoading: _propTypes.default.bool.isRequired,
+  loadingMessage: _propTypes.default.string.isRequired
+};
+var _default = LoadingIndicator;
 exports.default = _default;
-},{}],"services/index.js":[function(require,module,exports) {
+},{}],"../components/Fetcher.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+var _ink = require("ink");
+
+var _LoadingIndicator = _interopRequireDefault(require("./LoadingIndicator"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const DisplayData = ({
+  data
+}) => _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
+
+const DisplayError = ({
+  error
+}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
+  red: true
+}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
+
+const Fetcher = ({
+  beforeLoadingMessage,
+  DataDisplayer = DisplayData,
+  ErrorDisplayer = DisplayError,
+  fetchData,
+  dataMapper = data => data,
+  errorHandler = error => error.toString()
+}) => {
+  const [isLoading, setIsLoading] = (0, _react.useState)(false);
+  const [data, setData] = (0, _react.useState)(undefined);
+  const [error, setError] = (0, _react.useState)('');
+  (0, _react.useEffect)(() => {
+    async function fetch() {
+      try {
+        setIsLoading(true);
+        const response = await fetchData.call();
+        setIsLoading(false);
+        setData(dataMapper(response));
+      } catch (error) {
+        setIsLoading(false);
+        setData(' ');
+        setError(errorHandler(error));
+      }
+    }
+
+    fetch();
+  }, [fetchData]);
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
+    isLoading: isLoading,
+    loadingMessage: beforeLoadingMessage
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
+    data: data
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
+    error: error
+  })));
+};
+
+Fetcher.propTypes = {
+  afterLoadingMessage: _propTypes.default.string,
+  beforeLoadingMessage: _propTypes.default.string,
+  fetchData: _propTypes.default.func.isRequired,
+  dataMapper: _propTypes.default.func,
+  errorHandler: _propTypes.default.func
+};
+var _default = Fetcher;
+exports.default = _default;
+},{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -414,7 +508,7 @@ var _Table = _interopRequireDefault(require("../../components/Table"));
 
 var _chalk = _interopRequireDefault(require("chalk"));
 
-var _LoadingIndicator = _interopRequireDefault(require("../../components/LoadingIndicator"));
+var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -426,52 +520,31 @@ const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)
 
 const ServiceIndex = ({
   name
-}) => {
-  const [isLoading, setIsLoading] = (0, _react.useState)();
-  const [data, setData] = (0, _react.useState)([]);
-  (0, _react.useEffect)(() => {
-    async function fetch() {
-      try {
-        setIsLoading(true);
-        const {
-          data
-        } = await wpManagerClient.getProjectServicesStatuses(name);
-        const result = data.map(({
-          names,
-          ports: rawPorts,
-          status: rawStatus
-        }) => {
-          const status = /Up/.test(rawStatus) ? _chalk.default.green('●') : _chalk.default.red('●');
+}) => _react.default.createElement(_ink.Box, {
+  flexDirection: "column",
+  width: "5000"
+}, _react.default.createElement(_Fetcher.default, {
+  fetchData: wpManagerClient.getProjectServicesStatuses.bind(null, name),
+  beforeLoadingMessage: `Get ${name} project's statuses...`,
+  dataMapper: ({
+    data
+  }) => data.map(({
+    names,
+    ports: rawPorts,
+    status: rawStatus
+  }) => {
+    const status = /Up/.test(rawStatus) ? _chalk.default.green('●') : _chalk.default.red('●');
 
-          const ports = rawPorts || _chalk.default.italic('None');
+    const ports = rawPorts || _chalk.default.italic('None');
 
-          return {
-            names,
-            ports,
-            status
-          };
-        });
-        setIsLoading(false);
-        setData(result);
-      } catch (error) {
-        setIsLoading(false);
-        setData(error);
-      }
-    }
-
-    fetch();
-  }, [name]);
-  return _react.default.createElement(_ink.Box, {
-    flexDirection: "column",
-    width: "5000"
-  }, _react.default.createElement(_LoadingIndicator.default, {
-    isLoading: isLoading
-  }), data ? _react.default.createElement(_ink.Box, {
-    width: "100%"
-  }, _react.default.createElement(_Table.default, {
-    data: data
-  })) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "There is no data")));
-};
+    return {
+      names,
+      ports,
+      status
+    };
+  }),
+  DataDisplayer: _Table.default
+}));
 
 ServiceIndex.propTypes = {
   /// Name of the project
@@ -479,5 +552,5 @@ ServiceIndex.propTypes = {
 };
 var _default = ServiceIndex;
 exports.default = _default;
-},{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/Table":"../components/Table.js","../../components/LoadingIndicator":"../components/LoadingIndicator.js"}]},{},["services/index.js"], null)
+},{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/Table":"../components/Table.js","../../components/Fetcher":"../components/Fetcher.js"}]},{},["services/index.js"], null)
 //# sourceMappingURL=/services/index.js.map

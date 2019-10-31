@@ -307,19 +307,60 @@ function createWPManagerClient({
     },
     destroyProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).delete(),
     createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({}),
-    startProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
-      command: 'restart'
-    }),
-    stopProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
-      command: 'stop'
-    }),
-    createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
-      command: 'up'
-    }),
     installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params)
   };
 }
-},{"../services/http-client":"../services/http-client.js"}],"../components/LoadingIndicator.js":[function(require,module,exports) {
+},{"../services/http-client":"../services/http-client.js"}],"../components/Table.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _ink = require("ink");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const Table = ({
+  data
+}) => {
+  return _react.default.createElement(_ink.Box, null, data && data.length > 0 ? _react.default.createElement(_ink.Box, {
+    flexDirection: "column"
+  }, _react.default.createElement(_ink.Box, {
+    flexDirection: "row"
+  }, Object.keys(data[0]).map((header, index) => _react.default.createElement(_ink.Box, {
+    key: `header-${index}`,
+    marginRight: 2,
+    flexGrow: 1
+  }, _react.default.createElement(_ink.Color, {
+    blue: true
+  }, _react.default.createElement(_ink.Text, null, header.toUpperCase()))))), _react.default.createElement(_ink.Box, {
+    flexDirection: "column"
+  }, data.map((row, index) => {
+    return _react.default.createElement(_ink.Box, {
+      key: `row-${index}`,
+      flexDirection: "row",
+      flexGrow: 1
+    }, Object.values(row).map((cell, index) => {
+      return _react.default.createElement(_ink.Box, {
+        key: `cell-${index}`,
+        marginRight: 2,
+        justifyContent: "flex-start"
+      }, _react.default.createElement(_ink.Text, null, cell));
+    }));
+  }))) : _react.default.createElement(_ink.Color, {
+    white: true
+  }, _react.default.createElement(_ink.Text, null, "No data")));
+};
+
+var _default = Table;
+exports.default = _default;
+},{}],"../components/LoadingIndicator.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -358,7 +399,7 @@ LoadingIndicator.propTypes = {
 };
 var _default = LoadingIndicator;
 exports.default = _default;
-},{}],"services/destroy.js":[function(require,module,exports) {
+},{}],"../components/Fetcher.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -372,11 +413,7 @@ var _propTypes = _interopRequireDefault(require("prop-types"));
 
 var _ink = require("ink");
 
-var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
-
-var _httpClient = require("../../services/http-client");
-
-var _LoadingIndicator = _interopRequireDefault(require("../../components/LoadingIndicator"));
+var _LoadingIndicator = _interopRequireDefault(require("./LoadingIndicator"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -384,44 +421,129 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)()); /// Destroy services
-
-const Destroy = ({
-  name
+const DisplayData = ({
+  data
 }) => {
-  const [isLoading, setIsLoading] = (0, _react.useState)();
-  const [response, setResponse] = (0, _react.useState)('');
+  console.log('DATA', data);
+  return _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
+};
+
+const DisplayError = ({
+  error
+}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
+  red: true
+}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
+
+const Fetcher = ({
+  beforeLoadingMessage,
+  DataDisplayer = DisplayData,
+  ErrorDisplayer = DisplayError,
+  fetchData,
+  dataMapper = data => data,
+  errorHandler = error => error.toString()
+}) => {
+  const [isLoading, setIsLoading] = (0, _react.useState)(false);
+  const [data, setData] = (0, _react.useState)(undefined);
+  const [error, setError] = (0, _react.useState)('');
   (0, _react.useEffect)(() => {
     async function fetch() {
       try {
         setIsLoading(true);
-        const {
-          status
-        } = await wpManagerClient.destroyProjectServices(name);
+        const response = await fetchData.call();
         setIsLoading(false);
-        setResponse(status);
+        setData(dataMapper(response));
       } catch (error) {
         setIsLoading(false);
-        setResponse(error);
+        setError(errorHandler(error));
       }
     }
 
     fetch();
-  }, [name]);
-  return _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
-  }, _react.default.createElement(_LoadingIndicator.default, {
-    isLoading: isLoading
-  }), response ? _react.default.createElement(_ink.Box, {
-    width: "100%"
-  }, _react.default.createElement(_ink.Text, null, response)) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "There is no data")));
+  }, [fetchData]);
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
+    isLoading: isLoading,
+    loadingMessage: beforeLoadingMessage
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
+    data: data
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
+    error: error
+  })));
 };
 
-Destroy.propTypes = {
+Fetcher.propTypes = {
+  afterLoadingMessage: _propTypes.default.string,
+  beforeLoadingMessage: _propTypes.default.string,
+  fetchData: _propTypes.default.func.isRequired,
+  dataMapper: _propTypes.default.func,
+  errorHandler: _propTypes.default.func
+};
+var _default = Fetcher;
+exports.default = _default;
+},{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services/index copy.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+var _ink = require("ink");
+
+var _httpClient = require("../../services/http-client");
+
+var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
+
+var _Table = _interopRequireDefault(require("../../components/Table"));
+
+var _chalk = _interopRequireDefault(require("chalk"));
+
+var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)()); /// Get services statuses
+
+const ServiceIndex = ({
+  name
+}) => _react.default.createElement(_ink.Box, {
+  flexDirection: "column",
+  width: "5000"
+}, _react.default.createElement(_Fetcher.default, {
+  fetchData: wpManagerClient.getProjectServicesStatuses.bind(null, name),
+  beforeLoadingMessage: `Get ${name} project's statuses...`,
+  dataMapper: ({
+    data
+  }) => data.map(({
+    names,
+    ports: rawPorts,
+    status: rawStatus
+  }) => {
+    const status = /Up/.test(rawStatus) ? _chalk.default.green('●') : _chalk.default.red('●');
+
+    const ports = rawPorts || _chalk.default.italic('None');
+
+    return {
+      names,
+      ports,
+      status
+    };
+  }),
+  DataDisplayer: _Table.default
+}));
+
+ServiceIndex.propTypes = {
   /// Name of the project
   name: _propTypes.default.string.isRequired
 };
-var _default = Destroy;
+var _default = ServiceIndex;
 exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../services/http-client":"../services/http-client.js","../../components/LoadingIndicator":"../components/LoadingIndicator.js"}]},{},["services/destroy.js"], null)
-//# sourceMappingURL=/services/destroy.js.map
+},{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/Table":"../components/Table.js","../../components/Fetcher":"../components/Fetcher.js"}]},{},["services/index copy.js"], null)
+//# sourceMappingURL=/services/index%20copy.js.map
