@@ -307,6 +307,15 @@ function createWPManagerClient({
     },
     destroyProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).delete(),
     createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({}),
+    startProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
+      command: 'restart'
+    }),
+    stopProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
+      command: 'stop'
+    }),
+    createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
+      command: 'up'
+    }),
     installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params)
   };
 }
@@ -324,23 +333,30 @@ var _ink = require("ink");
 
 var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
 
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-const LoadingIndictor = ({
-  isLoading
+const LoadingIndicator = ({
+  isLoading,
+  loadingMessage = 'Fetching data from server'
 }) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
   bold: true
-}, "Fetching data from server "), _react.default.createElement(_ink.Color, {
+}, loadingMessage), _react.default.createElement(_ink.Color, {
   green: true
 }, _react.default.createElement(_inkSpinner.default, {
   type: "point"
-}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "Request completed ")));
+}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, " ")));
 
-var _default = LoadingIndictor;
+LoadingIndicator.propTypes = {
+  isLoading: _propTypes.default.bool.isRequired,
+  loadingMessage: _propTypes.default.string.isRequired
+};
+var _default = LoadingIndicator;
 exports.default = _default;
 },{}],"services/create.js":[function(require,module,exports) {
 "use strict";
