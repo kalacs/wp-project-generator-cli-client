@@ -1,22 +1,14 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Form } from 'react-final-form'
 import { Box } from 'ink'
 import Fetcher from '../../components/Fetcher';
 import createWPManagerClient from '../../services/wp-manager-client';
 import { createTextInput } from '../../utils/factories/field-creators';
 import FormField from '../../components/FormField';
+import { getConfig } from '../../services/http-client';
 
-const wpManagerClient = createWPManagerClient({
-    user: 'test',
-    password: 'test',
-    baseURL: 'http://127.0.0.1:3000',
-    logger: {
-		trace: () => {},
-		info: () => {},
-		error: () => {}
-	}
-});
-const isRequired = value => !value ? 'Required' : undefined; 
+const wpManagerClient = createWPManagerClient(getConfig());
+const isRequired = value => !value ? 'Required' : undefi0ned; 
 
 const fields = [
 	createTextInput(
@@ -38,7 +30,7 @@ const fields = [
 ]
 
 /// Generate new wordpress project from template
-const Generate = () => {
+const Generate = ({ onData }) => {
 	const [activeField, setActiveField] = React.useState(0)
 	const [submission, setSubmission] = React.useState()
 
@@ -88,7 +80,10 @@ const Generate = () => {
 				<Fetcher
 					fetchData={wpManagerClient.createWordpressProject.bind(null, submission)}
 					beforeLoadingMessage={`Generating project: "${submission.project.prefix}"`}
-					dataMapper={({ status }) => status === 200 ? 'Project structure has been created':'Something went wrong'}
+					dataMapper={(response) => {
+						onData(submission);
+						return response && response.status === 200 ? 'Project structure has been created':'Something went wrong';
+					}}
 				/>
 				:
 				''
@@ -96,4 +91,4 @@ const Generate = () => {
 		</Box>
 	)
 }
-export default Generate;
+export default memo(Generate);

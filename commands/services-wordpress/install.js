@@ -1,10 +1,10 @@
-import React, { Fragment } from 'react'
+import React, { memo } from 'react'
 import { Form } from 'react-final-form'
-import { Box,Text } from 'ink'
+import { Box } from 'ink'
 import createWPManagerClient from '../../services/wp-manager-client';
 import { createTextInput } from '../../utils/factories/field-creators';
 import FormField from '../../components/FormField';
-import LoadingIndictor from '../../components/LoadingIndicator';
+import Fetcher from '../../components/Fetcher';
 
 const wpManagerClient = createWPManagerClient({
     user: 'test',
@@ -32,18 +32,10 @@ const fields = [
 /// Install generated and started wordpress
 const Install = () => {
 	const [activeField, setActiveField] = React.useState(0)
-	const [status, setStatus] = React.useState(0)
-	const [isLoading, setIsLoading] = React.useState(false)
-	const [isSubmitted, setIsSubmitted] = React.useState(false)
+	const [submission, setSubmission] = React.useState()
 
 	return (
-		<Form onSubmit={async params => {
-			setIsSubmitted(true)
-			setIsLoading(true);
-			const { status } = await wpManagerClient.installProjectServiceWordpress(params);
-			setIsLoading(false);
-			setStatus(status);
-		}}>
+		<Form onSubmit={setSubmission}>
 			{({ handleSubmit, validating }) => (
 				<Box flexDirection="column">
 					{fields.map((
@@ -79,22 +71,13 @@ const Install = () => {
 						}
 					}} />))}
 					{
-						isSubmitted
+						submission
 						?
-						<Fragment>
-							<LoadingIndictor isLoading={isLoading}/>
-							{
-								status
-								?
-								<Box width="100%">
-									<Text>{status}</Text>
-								</Box>
-								:
-								<Box>
-									<Text>No response yet</Text>
-								</Box>
-							}
-						</Fragment>
+						<Fetcher
+							fetchData={wpManagerClient.installProjectServiceWordpress.bind(null, submission)}
+							beforeLoadingMessage={`Installing WP`}
+							dataMapper={(response) => response && response.status === 200 ? 'Worpress installed!':'Something went wrong'}
+						/>
 						:
 						''
 					}
@@ -103,4 +86,4 @@ const Install = () => {
 		</Form>
 	)
 }
-export default Install;
+export default memo(Install);

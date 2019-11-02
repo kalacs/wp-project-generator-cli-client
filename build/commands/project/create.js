@@ -197,19 +197,29 @@ const Fetcher = ({
   errorHandler = error => error.toString()
 }) => {
   const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)(undefined);
+  const [data, setData] = (0, _react.useState)();
   const [error, setError] = (0, _react.useState)('');
+  const onLoad = setIsLoading;
+
+  const onData = response => {
+    setData(dataMapper(response));
+  };
+
+  const onError = error => {
+    setError(errorHandler(error));
+  };
+
   (0, _react.useEffect)(() => {
     async function fetch() {
       try {
-        setIsLoading(true);
+        onLoad(true);
         const response = await fetchData.call();
-        setIsLoading(false);
-        setData(dataMapper(response));
+        onData(response);
+        onLoad(false);
       } catch (error) {
-        setIsLoading(false);
-        setData(' ');
-        setError(errorHandler(error));
+        onLoad(false);
+        onData(null);
+        onError(error);
       }
     }
 
@@ -232,7 +242,9 @@ Fetcher.propTypes = {
   dataMapper: _propTypes.default.func,
   errorHandler: _propTypes.default.func
 };
-var _default = Fetcher;
+
+var _default = (0, _react.memo)(Fetcher);
+
 exports.default = _default;
 },{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"../services/http-client.js":[function(require,module,exports) {
 "use strict";
@@ -423,7 +435,6 @@ function createWPManagerClient({
       return projectServicesEndpoint.get();
     },
     destroyProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).delete(),
-    createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({}),
     startProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
       command: 'restart'
     }),
@@ -695,7 +706,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _react = _interopRequireDefault(require("react"));
+var _react = _interopRequireWildcard(require("react"));
 
 var _reactFinalForm = require("react-final-form");
 
@@ -709,26 +720,25 @@ var _fieldCreators = require("../../utils/factories/field-creators");
 
 var _FormField = _interopRequireDefault(require("../../components/FormField"));
 
+var _httpClient = require("../../services/http-client");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-const wpManagerClient = (0, _wpManagerClient.default)({
-  user: 'test',
-  password: 'test',
-  baseURL: 'http://127.0.0.1:3000',
-  logger: {
-    trace: () => {},
-    info: () => {},
-    error: () => {}
-  }
-});
+const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)());
 
-const isRequired = value => !value ? 'Required' : undefined;
+const isRequired = value => !value ? 'Required' : undefi0ned;
 
 const fields = [(0, _fieldCreators.createTextInput)('project.prefix', 'Project prefix', 'my-awesome-project', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', isRequired), (0, _fieldCreators.createTextInput)('project.database.name', 'Database name', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.user', 'Database user', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.password', 'Database password', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.rootPassword', 'Database root password', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.webserver.port', 'Webserver port', '', undefined, isRequired)]; /// Generate new wordpress project from template
 
-const Generate = () => {
+const Generate = ({
+  onData
+}) => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
   const [submission, setSubmission] = _react.default.useState();
@@ -779,13 +789,15 @@ const Generate = () => {
   }))))), submission ? _react.default.createElement(_Fetcher.default, {
     fetchData: wpManagerClient.createWordpressProject.bind(null, submission),
     beforeLoadingMessage: `Generating project: "${submission.project.prefix}"`,
-    dataMapper: ({
-      status
-    }) => status === 200 ? 'Project structure has been created' : 'Something went wrong'
+    dataMapper: response => {
+      onData(submission);
+      return response && response.status === 200 ? 'Project structure has been created' : 'Something went wrong';
+    }
   }) : '');
 };
 
-var _default = Generate;
+var _default = (0, _react.memo)(Generate);
+
 exports.default = _default;
-},{"../../components/Fetcher":"../components/Fetcher.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js"}]},{},["project/create.js"], null)
+},{"../../components/Fetcher":"../components/Fetcher.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../services/http-client":"../services/http-client.js"}]},{},["project/create.js"], null)
 //# sourceMappingURL=/project/create.js.map

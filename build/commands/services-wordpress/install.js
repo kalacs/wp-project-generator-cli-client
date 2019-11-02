@@ -306,7 +306,6 @@ function createWPManagerClient({
       return projectServicesEndpoint.get();
     },
     destroyProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).delete(),
-    createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({}),
     startProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
       command: 'restart'
     }),
@@ -609,7 +608,97 @@ LoadingIndicator.propTypes = {
 };
 var _default = LoadingIndicator;
 exports.default = _default;
-},{}],"services-wordpress/install.js":[function(require,module,exports) {
+},{}],"../components/Fetcher.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+var _ink = require("ink");
+
+var _LoadingIndicator = _interopRequireDefault(require("./LoadingIndicator"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const DisplayData = ({
+  data
+}) => _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
+
+const DisplayError = ({
+  error
+}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
+  red: true
+}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
+
+const Fetcher = ({
+  beforeLoadingMessage,
+  DataDisplayer = DisplayData,
+  ErrorDisplayer = DisplayError,
+  fetchData,
+  dataMapper = data => data,
+  errorHandler = error => error.toString()
+}) => {
+  const [isLoading, setIsLoading] = (0, _react.useState)(false);
+  const [data, setData] = (0, _react.useState)();
+  const [error, setError] = (0, _react.useState)('');
+  const onLoad = setIsLoading;
+
+  const onData = response => {
+    setData(dataMapper(response));
+  };
+
+  const onError = error => {
+    setError(errorHandler(error));
+  };
+
+  (0, _react.useEffect)(() => {
+    async function fetch() {
+      try {
+        onLoad(true);
+        const response = await fetchData.call();
+        onData(response);
+        onLoad(false);
+      } catch (error) {
+        onLoad(false);
+        onData(null);
+        onError(error);
+      }
+    }
+
+    fetch();
+  }, [fetchData]);
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
+    isLoading: isLoading,
+    loadingMessage: beforeLoadingMessage
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
+    data: data
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
+    error: error
+  })));
+};
+
+Fetcher.propTypes = {
+  afterLoadingMessage: _propTypes.default.string,
+  beforeLoadingMessage: _propTypes.default.string,
+  fetchData: _propTypes.default.func.isRequired,
+  dataMapper: _propTypes.default.func,
+  errorHandler: _propTypes.default.func
+};
+
+var _default = (0, _react.memo)(Fetcher);
+
+exports.default = _default;
+},{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services-wordpress/install.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -629,7 +718,7 @@ var _fieldCreators = require("../../utils/factories/field-creators");
 
 var _FormField = _interopRequireDefault(require("../../components/FormField"));
 
-var _LoadingIndicator = _interopRequireDefault(require("../../components/LoadingIndicator"));
+var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -659,22 +748,10 @@ const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequ
 const Install = () => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
-  const [status, setStatus] = _react.default.useState(0);
-
-  const [isLoading, setIsLoading] = _react.default.useState(false);
-
-  const [isSubmitted, setIsSubmitted] = _react.default.useState(false);
+  const [submission, setSubmission] = _react.default.useState();
 
   return _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: async params => {
-      setIsSubmitted(true);
-      setIsLoading(true);
-      const {
-        status
-      } = await wpManagerClient.installProjectServiceWordpress(params);
-      setIsLoading(false);
-      setStatus(status);
-    }
+    onSubmit: setSubmission
   }, ({
     handleSubmit,
     validating
@@ -714,14 +791,15 @@ const Install = () => {
         input.onBlur(); // mark as touched to show error
       }
     }
-  }))), isSubmitted ? _react.default.createElement(_react.Fragment, null, _react.default.createElement(_LoadingIndicator.default, {
-    isLoading: isLoading
-  }), status ? _react.default.createElement(_ink.Box, {
-    width: "100%"
-  }, _react.default.createElement(_ink.Text, null, status)) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, "No response yet"))) : ''));
+  }))), submission ? _react.default.createElement(_Fetcher.default, {
+    fetchData: wpManagerClient.installProjectServiceWordpress.bind(null, submission),
+    beforeLoadingMessage: `Installing WP`,
+    dataMapper: response => response && response.status === 200 ? 'Worpress installed!' : 'Something went wrong'
+  }) : ''));
 };
 
-var _default = Install;
+var _default = (0, _react.memo)(Install);
+
 exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../components/LoadingIndicator":"../components/LoadingIndicator.js"}]},{},["services-wordpress/install.js"], null)
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../components/Fetcher":"../components/Fetcher.js"}]},{},["services-wordpress/install.js"], null)
 //# sourceMappingURL=/services-wordpress/install.js.map

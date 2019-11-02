@@ -134,7 +134,9 @@ var _ink = require("ink");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /// Project index
-const ProjectIndex = () => _react.default.createElement(_ink.Text, null, "This is index of project command");
+const ProjectIndex = () => {
+  return _react.default.createElement(_ink.Text, null, "This is index of project command");
+};
 
 var _default = ProjectIndex;
 exports.default = _default;

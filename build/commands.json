@@ -25,7 +25,7 @@
 				{
 					"path": "project/create.js",
 					"name": "create",
-					"description": "Generate new wordpress project from template",
+					"description": "",
 					"args": [],
 					"subCommands": []
 				},
@@ -41,32 +41,14 @@
 		{
 			"path": "services/index.js",
 			"name": "services",
-			"description": "Get services statuses",
-			"args": [
-				{
-					"key": "name",
-					"type": "string",
-					"description": "Name of the project",
-					"isRequired": true,
-					"aliases": [],
-					"positional": false
-				}
-			],
+			"description": "",
+			"args": [],
 			"subCommands": [
 				{
 					"path": "services/create.js",
 					"name": "create",
-					"description": "Create services",
-					"args": [
-						{
-							"key": "name",
-							"type": "string",
-							"description": "Name of the project",
-							"isRequired": true,
-							"aliases": [],
-							"positional": false
-						}
-					],
+					"description": "",
+					"args": [],
 					"subCommands": []
 				},
 				{
@@ -128,7 +110,7 @@
 				{
 					"path": "services-wordpress/install.js",
 					"name": "install",
-					"description": "Install generated and started wordpress",
+					"description": "",
 					"args": [],
 					"subCommands": []
 				}

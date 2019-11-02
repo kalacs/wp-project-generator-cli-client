@@ -21,7 +21,6 @@ export default function createWPManagerClient({
           return projectServicesEndpoint.get();
         },
         destroyProjectServices: name => (client.makeEndpointWithAuth(`/wordpress-project/${name}/services`)).delete(),
-        createProjectServices: name => (client.makeEndpointWithAuth(`/wordpress-project/${name}/services`)).post({}),
         startProjectServices: name => (client.makeEndpointWithAuth(`/wordpress-project/${name}/services`)).post({ command: 'restart' }),
         stopProjectServices: name => (client.makeEndpointWithAuth(`/wordpress-project/${name}/services`)).post({ command: 'stop' }),
         createProjectServices: name => (client.makeEndpointWithAuth(`/wordpress-project/${name}/services`)).post({ command: 'up' }),

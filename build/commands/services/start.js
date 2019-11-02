@@ -306,7 +306,6 @@ function createWPManagerClient({
       return projectServicesEndpoint.get();
     },
     destroyProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).delete(),
-    createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({}),
     startProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
       command: 'restart'
     }),
@@ -399,19 +398,29 @@ const Fetcher = ({
   errorHandler = error => error.toString()
 }) => {
   const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)(undefined);
+  const [data, setData] = (0, _react.useState)();
   const [error, setError] = (0, _react.useState)('');
+  const onLoad = setIsLoading;
+
+  const onData = response => {
+    setData(dataMapper(response));
+  };
+
+  const onError = error => {
+    setError(errorHandler(error));
+  };
+
   (0, _react.useEffect)(() => {
     async function fetch() {
       try {
-        setIsLoading(true);
+        onLoad(true);
         const response = await fetchData.call();
-        setIsLoading(false);
-        setData(dataMapper(response));
+        onData(response);
+        onLoad(false);
       } catch (error) {
-        setIsLoading(false);
-        setData(' ');
-        setError(errorHandler(error));
+        onLoad(false);
+        onData(null);
+        onError(error);
       }
     }
 
@@ -434,7 +443,9 @@ Fetcher.propTypes = {
   dataMapper: _propTypes.default.func,
   errorHandler: _propTypes.default.func
 };
-var _default = Fetcher;
+
+var _default = (0, _react.memo)(Fetcher);
+
 exports.default = _default;
 },{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services/start.js":[function(require,module,exports) {
 "use strict";
