@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from 'ink';
 import { getConfig } from '../../services/http-client';
@@ -15,15 +15,17 @@ const ServiceIndex = ({ name }) => (
 		<Fetcher
 			fetchData={wpManagerClient.getProjectServicesStatuses.bind(null, name)}
 			beforeLoadingMessage={`Get ${name} project's statuses...`}
-			dataMapper={({ data }) => data.map(({ names, ports: rawPorts, status: rawStatus }) => {
-				const status = /Up/.test(rawStatus) ? chalk.green('●') : chalk.red('●');
-				const ports = rawPorts || chalk.italic('None');
-				return {
-					names,
-					ports,
-					status
-				};
-			})}
+			dataMapper={response => {
+				return response && response.data ? response.data.map(({ names, ports: rawPorts, status: rawStatus }) => {
+					const status = /Up/.test(rawStatus) ? chalk.green('●') : chalk.red('●');
+					const ports = rawPorts || chalk.italic('None');
+					return {
+						names,
+						ports,
+						status
+					};
+				}) : {};
+			}}
 			DataDisplayer={Table}
 		/>
 	</Box>
@@ -34,4 +36,4 @@ ServiceIndex.propTypes = {
 	name: PropTypes.string.isRequired
 };
 
-export default ServiceIndex;
+export default memo(ServiceIndex);

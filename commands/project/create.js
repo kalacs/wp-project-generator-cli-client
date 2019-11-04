@@ -1,21 +1,13 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Form } from 'react-final-form'
-import { Box, Color } from 'ink'
-import Spinner from 'ink-spinner'
+import { Box } from 'ink'
+import Fetcher from '../../components/Fetcher';
 import createWPManagerClient from '../../services/wp-manager-client';
 import { createTextInput } from '../../utils/factories/field-creators';
 import FormField from '../../components/FormField';
+import { getConfig } from '../../services/http-client';
 
-const wpManagerClient = createWPManagerClient({
-    user: 'test',
-    password: 'test',
-    baseURL: 'http://127.0.0.1:3000',
-    logger: {
-		trace: () => {},
-		info: () => {},
-		error: () => {}
-	}
-});
+const wpManagerClient = createWPManagerClient(getConfig());
 const isRequired = value => !value ? 'Required' : undefined; 
 
 const fields = [
@@ -38,22 +30,27 @@ const fields = [
 ]
 
 /// Generate new wordpress project from template
-const CliForm = () => {
+const Generate = ({ onData }) => {
 	const [activeField, setActiveField] = React.useState(0)
 	const [submission, setSubmission] = React.useState()
-	const [isLoading, setIsLoading] = React.useState(false)
 
 	return (
-		<Form onSubmit={async params => {
-			setIsLoading(true);
-			await wpManagerClient.createWordpressProject(params);
-			setSubmission(params);
-			setIsLoading(false);
-		}}>
-			{({ handleSubmit, validating }) => (
-				<Box flexDirection="column">
-					{fields.map((
-						{
+		<Box flexDirection="column">
+			<Form onSubmit={setSubmission}>
+				{({ handleSubmit, validating }) => (
+					<Box flexDirection="column">
+						{fields.map((
+							{
+								name,
+								label,
+								placeholder,
+								format,
+								validate,
+								Input,
+								inputConfig,
+							},
+							index
+						) => (<FormField key={name} {...{
 							name,
 							label,
 							placeholder,
@@ -61,33 +58,37 @@ const CliForm = () => {
 							validate,
 							Input,
 							inputConfig,
-						},
-						index
-					) => (<FormField key={name} {...{
-						name,
-						label,
-						placeholder,
-						format,
-						validate,
-						Input,
-						inputConfig,
-						isActive: activeField === index,
-						onSubmit: ({ meta, input}) => {
-							if (meta.valid && !validating) {
-								setActiveField(value => value + 1) // go to next field
-								if (activeField === fields.length - 1) {
-									// last field, so submit
-									handleSubmit()
+							isActive: activeField === index,
+							onSubmit: ({ meta, input}) => {
+								if (meta.valid && !validating) {
+									setActiveField(value => value + 1) // go to next field
+									if (activeField === fields.length - 1) {
+										// last field, so submit
+										handleSubmit()
+									}
+								} else {
+									input.onBlur() // mark as touched to show error
 								}
-							} else {
-								input.onBlur() // mark as touched to show error
 							}
-						}
-					}} />))}
-				{submission ? (isLoading ? 	<Box marginLeft={1}><Color yellow><Spinner type="dots" /></Color></Box>  : 'Sent to server'):''}
-				</Box>
-			)}
-		</Form>
+						}} />))}
+					</Box>
+				)}
+			</Form>
+			{
+				submission
+				?
+				<Fetcher
+					fetchData={wpManagerClient.createWordpressProject.bind(null, submission)}
+					beforeLoadingMessage={`Generating project: "${submission.project.prefix}"`}
+					dataMapper={(response) => {
+						onData(submission);
+						return response && response.status === 200 ? 'Project structure has been created':'Something went wrong';
+					}}
+				/>
+				:
+				''
+			}
+		</Box>
 	)
 }
-export default CliForm;
+export default memo(Generate);

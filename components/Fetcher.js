@@ -1,11 +1,11 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, memo } from 'react';
 import PropTypes from 'prop-types';
 import { Text, Box, Color } from 'ink';
 import LoadingIndicator from './LoadingIndicator';
 
 const DisplayData = ({ data }) => (
     <Fragment>
-        { data === undefined ? <Text>No data yet</Text> : <Text>{data}</Text>}        
+        { data === undefined ? <Text>No data yet</Text> : <Text>{data}</Text>}
     </Fragment>
 );
 
@@ -25,32 +25,40 @@ const Fetcher = ({
 }) => {
 
 	const [ isLoading, setIsLoading ] = useState(false);
-	const [ data, setData ] = useState(undefined);
+	const [ data, setData ] = useState();
     const [ error, setError ] = useState('');
+    const onLoad = setIsLoading;
 
-	useEffect(() => {
-		async function fetch() {
+    const onData = response => {
+       setData(dataMapper(response));
+    };
+
+    const onError = (error) => {
+        setError(errorHandler(error))
+    };
+
+    useEffect(() => {
+        async function fetch() {
 			try {
-				setIsLoading(true);
+				onLoad(true);
 				const response = await fetchData.call();
-				setIsLoading(false);
-				setData(dataMapper(response));
+                onData(response);
+				onLoad(false);
 			} catch (error) {
-                setIsLoading(false);
-                setData(' ');
-				setError(errorHandler(error));
-			}
+				onLoad(false);
+                onData(null);
+                onError(error)
+            }
 		}
 		fetch();
-	}, [fetchData]);
-
-	return (
+    }, [fetchData]);
+    return (
         <Fragment>
             <Box>
-			<LoadingIndicator
-                isLoading={isLoading}
-                loadingMessage={beforeLoadingMessage}
-            />
+                <LoadingIndicator
+                    isLoading={isLoading}
+                    loadingMessage={beforeLoadingMessage}
+                />
             </Box>
             <Box>
                 <DataDisplayer data={data}/>
@@ -70,4 +78,4 @@ Fetcher.propTypes = {
     errorHandler: PropTypes.func
 };
 
-export default Fetcher;
+export default memo(Fetcher);

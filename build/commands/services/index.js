@@ -306,7 +306,6 @@ function createWPManagerClient({
       return projectServicesEndpoint.get();
     },
     destroyProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).delete(),
-    createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({}),
     startProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
       command: 'restart'
     }),
@@ -449,19 +448,29 @@ const Fetcher = ({
   errorHandler = error => error.toString()
 }) => {
   const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)(undefined);
+  const [data, setData] = (0, _react.useState)();
   const [error, setError] = (0, _react.useState)('');
+  const onLoad = setIsLoading;
+
+  const onData = response => {
+    setData(dataMapper(response));
+  };
+
+  const onError = error => {
+    setError(errorHandler(error));
+  };
+
   (0, _react.useEffect)(() => {
     async function fetch() {
       try {
-        setIsLoading(true);
+        onLoad(true);
         const response = await fetchData.call();
-        setIsLoading(false);
-        setData(dataMapper(response));
+        onData(response);
+        onLoad(false);
       } catch (error) {
-        setIsLoading(false);
-        setData(' ');
-        setError(errorHandler(error));
+        onLoad(false);
+        onData(null);
+        onError(error);
       }
     }
 
@@ -484,7 +493,9 @@ Fetcher.propTypes = {
   dataMapper: _propTypes.default.func,
   errorHandler: _propTypes.default.func
 };
-var _default = Fetcher;
+
+var _default = (0, _react.memo)(Fetcher);
+
 exports.default = _default;
 },{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services/index.js":[function(require,module,exports) {
 "use strict";
@@ -526,23 +537,23 @@ const ServiceIndex = ({
 }, _react.default.createElement(_Fetcher.default, {
   fetchData: wpManagerClient.getProjectServicesStatuses.bind(null, name),
   beforeLoadingMessage: `Get ${name} project's statuses...`,
-  dataMapper: ({
-    data
-  }) => data.map(({
-    names,
-    ports: rawPorts,
-    status: rawStatus
-  }) => {
-    const status = /Up/.test(rawStatus) ? _chalk.default.green('●') : _chalk.default.red('●');
-
-    const ports = rawPorts || _chalk.default.italic('None');
-
-    return {
+  dataMapper: response => {
+    return response && response.data ? response.data.map(({
       names,
-      ports,
-      status
-    };
-  }),
+      ports: rawPorts,
+      status: rawStatus
+    }) => {
+      const status = /Up/.test(rawStatus) ? _chalk.default.green('●') : _chalk.default.red('●');
+
+      const ports = rawPorts || _chalk.default.italic('None');
+
+      return {
+        names,
+        ports,
+        status
+      };
+    }) : {};
+  },
   DataDisplayer: _Table.default
 }));
 
@@ -550,7 +561,9 @@ ServiceIndex.propTypes = {
   /// Name of the project
   name: _propTypes.default.string.isRequired
 };
-var _default = ServiceIndex;
+
+var _default = (0, _react.memo)(ServiceIndex);
+
 exports.default = _default;
 },{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/Table":"../components/Table.js","../../components/Fetcher":"../components/Fetcher.js"}]},{},["services/index.js"], null)
 //# sourceMappingURL=/services/index.js.map

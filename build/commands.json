@@ -25,7 +25,14 @@
 				{
 					"path": "project/create.js",
 					"name": "create",
-					"description": "Generate new wordpress project from template",
+					"description": "",
+					"args": [],
+					"subCommands": []
+				},
+				{
+					"path": "project/kickstart.js",
+					"name": "kickstart",
+					"description": "Kickstart project",
 					"args": [],
 					"subCommands": []
 				}
@@ -34,38 +41,20 @@
 		{
 			"path": "services/index.js",
 			"name": "services",
-			"description": "Get services statuses",
-			"args": [
-				{
-					"key": "name",
-					"type": "string",
-					"description": "Name of the project",
-					"isRequired": true,
-					"aliases": [],
-					"positional": false
-				}
-			],
+			"description": "",
+			"args": [],
 			"subCommands": [
+				{
+					"path": "services/create.js",
+					"name": "create",
+					"description": "",
+					"args": [],
+					"subCommands": []
+				},
 				{
 					"path": "services/destroy.js",
 					"name": "destroy",
 					"description": "Destroy services",
-					"args": [
-						{
-							"key": "name",
-							"type": "string",
-							"description": "Name of the project",
-							"isRequired": true,
-							"aliases": [],
-							"positional": false
-						}
-					],
-					"subCommands": []
-				},
-				{
-					"path": "services/create.js",
-					"name": "create",
-					"description": "Create services",
 					"args": [
 						{
 							"key": "name",
@@ -121,7 +110,7 @@
 				{
 					"path": "services-wordpress/install.js",
 					"name": "install",
-					"description": "Install generated and started wordpress",
+					"description": "",
 					"args": [],
 					"subCommands": []
 				}
