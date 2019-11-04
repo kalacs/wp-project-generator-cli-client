@@ -732,7 +732,7 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)());
 
-const isRequired = value => !value ? 'Required' : undefi0ned;
+const isRequired = value => !value ? 'Required' : undefined;
 
 const fields = [(0, _fieldCreators.createTextInput)('project.prefix', 'Project prefix', 'my-awesome-project', value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, '').replace(/ /g, '-') : '', isRequired), (0, _fieldCreators.createTextInput)('project.database.name', 'Database name', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.user', 'Database user', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.password', 'Database password', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.database.rootPassword', 'Database root password', '', undefined, isRequired), (0, _fieldCreators.createTextInput)('project.webserver.port', 'Webserver port', '', undefined, isRequired)]; /// Generate new wordpress project from template
 

@@ -8,7 +8,7 @@ import FormField from '../../components/FormField';
 import { getConfig } from '../../services/http-client';
 
 const wpManagerClient = createWPManagerClient(getConfig());
-const isRequired = value => !value ? 'Required' : undefi0ned; 
+const isRequired = value => !value ? 'Required' : undefined; 
 
 const fields = [
 	createTextInput(
