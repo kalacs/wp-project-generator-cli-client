@@ -898,13 +898,17 @@ const noFormatNoPlaceholderRequired = (name, label) => [name, label, '', undefin
 
 const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('projectPrefix', 'Project name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('container', 'Container name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('network', 'Network name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('url', 'WP Url')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('title', 'Title')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminName', 'Admin name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminPassword', 'Admin password')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminEmail', 'Admin email'))]; /// Install generated and started wordpress
 
-const Install = () => {
+const Install = ({
+  initialValues,
+  onData
+}) => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
   const [submission, setSubmission] = _react.default.useState();
 
   return _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: setSubmission
+    onSubmit: setSubmission,
+    initialValues: initialValues
   }, ({
     handleSubmit,
     validating
@@ -947,7 +951,10 @@ const Install = () => {
   }))), submission ? _react.default.createElement(_Fetcher.default, {
     fetchData: wpManagerClient.installProjectServiceWordpress.bind(null, submission),
     beforeLoadingMessage: `Installing WP`,
-    dataMapper: response => response && response.status === 200 ? 'Worpress installed!' : 'Something went wrong'
+    dataMapper: response => {
+      onData(submission);
+      return response && response.status === 200 ? 'Worpress installed!' : 'Something went wrong';
+    }
   }) : ''));
 };
 
@@ -972,6 +979,8 @@ var _create2 = _interopRequireDefault(require("../services/create"));
 
 var _install = _interopRequireDefault(require("../services-wordpress/install"));
 
+var _inkLink = _interopRequireDefault(require("ink-link"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
@@ -983,7 +992,22 @@ const getName = data => data.project.prefix; /// Kickstart project
 
 const ProjectKickstart = () => {
   const [firstTaskData, setFirstTaskData] = (0, _react.useState)();
-  const [secondTaskData, setSecondTaskData] = (0, _react.useState)(); //    const [ thirdTaskData, setThirdTaskData ] = useState();
+  const [secondTaskData, setSecondTaskData] = (0, _react.useState)();
+  const [thirdTaskData, setThirdTaskData] = (0, _react.useState)();
+
+  const getInitialValues = ({
+    project: {
+      prefix: projectPrefix,
+      webserver: {
+        port
+      }
+    }
+  }) => ({
+    projectPrefix,
+    container: `${projectPrefix}-wordpress`,
+    network: `${projectPrefix}-wp-network`,
+    url: `0.0.0.0:${port}`
+  });
 
   return _react.default.createElement(_ink.Box, {
     flexDirection: "column"
@@ -992,7 +1016,14 @@ const ProjectKickstart = () => {
   }), firstTaskData || secondTaskData ? _react.default.createElement(_create2.default, {
     name: getName(firstTaskData),
     onData: setSecondTaskData
-  }) : '', secondTaskData ? _react.default.createElement(_install.default, null) : '');
+  }) : '', secondTaskData ? _react.default.createElement(_install.default, {
+    initialValues: getInitialValues(firstTaskData),
+    onData: setThirdTaskData
+  }) : '', thirdTaskData ? _react.default.createElement(_inkLink.default, {
+    url: `http://${thirdTaskData.url}`
+  }, _react.default.createElement(_ink.Color, {
+    green: true
+  }, "Open wordpress site")) : '');
 };
 
 var _default = ProjectKickstart;

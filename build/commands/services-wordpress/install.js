@@ -745,13 +745,17 @@ const noFormatNoPlaceholderRequired = (name, label) => [name, label, '', undefin
 
 const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('projectPrefix', 'Project name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('container', 'Container name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('network', 'Network name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('url', 'WP Url')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('title', 'Title')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminName', 'Admin name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminPassword', 'Admin password')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminEmail', 'Admin email'))]; /// Install generated and started wordpress
 
-const Install = () => {
+const Install = ({
+  initialValues,
+  onData
+}) => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
   const [submission, setSubmission] = _react.default.useState();
 
   return _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: setSubmission
+    onSubmit: setSubmission,
+    initialValues: initialValues
   }, ({
     handleSubmit,
     validating
@@ -794,7 +798,10 @@ const Install = () => {
   }))), submission ? _react.default.createElement(_Fetcher.default, {
     fetchData: wpManagerClient.installProjectServiceWordpress.bind(null, submission),
     beforeLoadingMessage: `Installing WP`,
-    dataMapper: response => response && response.status === 200 ? 'Worpress installed!' : 'Something went wrong'
+    dataMapper: response => {
+      onData(submission);
+      return response && response.status === 200 ? 'Worpress installed!' : 'Something went wrong';
+    }
   }) : ''));
 };
 

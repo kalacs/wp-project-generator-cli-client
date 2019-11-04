@@ -30,12 +30,12 @@ const fields = [
 ]
 
 /// Install generated and started wordpress
-const Install = () => {
+const Install = ({ initialValues, onData }) => {
 	const [activeField, setActiveField] = React.useState(0)
 	const [submission, setSubmission] = React.useState()
 
 	return (
-		<Form onSubmit={setSubmission}>
+		<Form onSubmit={setSubmission} initialValues={initialValues}>
 			{({ handleSubmit, validating }) => (
 				<Box flexDirection="column">
 					{fields.map((
@@ -76,7 +76,10 @@ const Install = () => {
 						<Fetcher
 							fetchData={wpManagerClient.installProjectServiceWordpress.bind(null, submission)}
 							beforeLoadingMessage={`Installing WP`}
-							dataMapper={(response) => response && response.status === 200 ? 'Worpress installed!':'Something went wrong'}
+							dataMapper={(response) => {
+								onData(submission);
+								return response && response.status === 200 ? 'Worpress installed!':'Something went wrong';
+							}}
 						/>
 						:
 						''
