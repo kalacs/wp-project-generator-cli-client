@@ -320,96 +320,50 @@ function createWPManagerClient({
     getWordpressPackages: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services/wordpress/packages`).get()
   };
 }
-},{"../services/http-client":"../services/http-client.js"}],"../components/Table.js":[function(require,module,exports) {
+},{"../services/http-client":"../services/http-client.js"}],"../components/SelectInput.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.default = SelectInput;
 
-var _react = _interopRequireWildcard(require("react"));
+var _react = _interopRequireDefault(require("react"));
 
-var _ink = require("ink");
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-const Table = ({
-  data
-}) => {
-  return _react.default.createElement(_ink.Box, null, data && data.length > 0 ? _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
-  }, _react.default.createElement(_ink.Box, {
-    flexDirection: "row"
-  }, Object.keys(data[0]).map((header, index) => _react.default.createElement(_ink.Box, {
-    key: `header-${index}`,
-    marginRight: 2,
-    flexGrow: 1
-  }, _react.default.createElement(_ink.Color, {
-    blue: true
-  }, _react.default.createElement(_ink.Text, null, header.toUpperCase()))))), _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
-  }, data.map((row, index) => {
-    return _react.default.createElement(_ink.Box, {
-      key: `row-${index}`,
-      flexDirection: "row",
-      flexGrow: 1
-    }, Object.values(row).map((cell, index) => {
-      return _react.default.createElement(_ink.Box, {
-        key: `cell-${index}`,
-        marginRight: 2,
-        justifyContent: "flex-start"
-      }, _react.default.createElement(_ink.Text, null, cell));
-    }));
-  }))) : _react.default.createElement(_ink.Color, {
-    white: true
-  }, _react.default.createElement(_ink.Text, null, "No data")));
-};
-
-var _default = Table;
-exports.default = _default;
-},{}],"../components/LoadingIndicator.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _react = _interopRequireWildcard(require("react"));
-
-var _ink = require("ink");
-
-var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
+var _inkSelectInput = _interopRequireDefault(require("ink-select-input"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
-const LoadingIndicator = ({
-  isLoading,
-  loadingMessage = 'Fetching data from server'
-}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
-  green: true
-}, _react.default.createElement(_inkSpinner.default, {
-  type: "point"
-})), _react.default.createElement(_ink.Text, {
-  bold: true
-}, loadingMessage)) : '');
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
-LoadingIndicator.propTypes = {
-  isLoading: _propTypes.default.bool.isRequired,
-  loadingMessage: _propTypes.default.string.isRequired
-};
-var _default = LoadingIndicator;
-exports.default = _default;
-},{}],"../components/Fetcher.js":[function(require,module,exports) {
+function SelectInput(_ref) {
+  let {
+    onSubmit,
+    onBlur,
+    onChange,
+    onFocus
+  } = _ref,
+      props = _objectWithoutProperties(_ref, ["onSubmit", "onBlur", "onChange", "onFocus"]);
+
+  _react.default.useEffect(() => {
+    onFocus();
+    return onBlur;
+  }, [onFocus, onBlur]);
+
+  return _react.default.createElement(_inkSelectInput.default, _extends({}, props, {
+    onSelect: ({
+      value
+    }) => {
+      onChange(value);
+      onSubmit();
+    }
+  }));
+}
+},{}],"../utils/hooks/fetch.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -417,89 +371,150 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _react = _interopRequireWildcard(require("react"));
+var _react = require("react");
 
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-var _ink = require("ink");
-
-var _LoadingIndicator = _interopRequireDefault(require("./LoadingIndicator"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-const DisplayData = ({
-  data
-}) => _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
-
-const DisplayError = ({
-  error
-}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
-  red: true
-}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
-
-const Fetcher = ({
-  beforeLoadingMessage,
-  DataDisplayer = DisplayData,
-  ErrorDisplayer = DisplayError,
-  fetchData,
-  dataMapper = data => data,
-  errorHandler = error => error.toString()
+const fetchHook = ({
+  onSuccess,
+  onLoad,
+  onFailed,
+  fetchData
 }) => {
-  const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)();
-  const [error, setError] = (0, _react.useState)('');
-  const onLoad = setIsLoading;
-
-  const onData = response => {
-    setData(dataMapper(response));
-  };
-
-  const onError = error => {
-    setError(errorHandler(error));
-  };
-
-  (0, _react.useEffect)(() => {
+  return () => {
     async function fetch() {
       try {
         onLoad(true);
         const response = await fetchData.call();
-        onData(response);
+        onSuccess(response);
         onLoad(false);
       } catch (error) {
         onLoad(false);
-        onData(null);
-        onError(error);
+        onSuccess(null);
+        onFailed(error);
       }
     }
 
     fetch();
-  }, [fetchData]);
-  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
-    isLoading: isLoading,
-    loadingMessage: beforeLoadingMessage
-  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
-    data: data
-  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
-    error: error
+  };
+};
+
+var _default = fetchHook;
+exports.default = _default;
+},{}],"../components/DynamicSelect.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _ink = require("ink");
+
+var _SelectInput = _interopRequireDefault(require("./SelectInput"));
+
+var _fetch = _interopRequireDefault(require("../utils/hooks/fetch"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+const DynamicSelect = ({
+  label,
+  selectProps,
+  hookProps,
+  toItems = () => []
+}) => {
+  const {
+    onSuccess = () => {},
+    onLoad = () => {},
+    onFailed = () => {},
+    fetchData = () => {}
+  } = hookProps;
+  const [items, setItems] = (0, _react.useState)([]);
+  (0, _react.useEffect)((0, _fetch.default)({
+    onSuccess: ({
+      data
+    }) => setItems(toItems(data)),
+    onLoad,
+    onFailed: error => console.log('ERROR', error),
+    fetchData
+  }), []);
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Text, {
+    bold: true
+  }, label), _react.default.createElement(_SelectInput.default, _extends({}, selectProps, {
+    items: items
   })));
 };
 
-Fetcher.propTypes = {
-  afterLoadingMessage: _propTypes.default.string,
-  beforeLoadingMessage: _propTypes.default.string,
-  fetchData: _propTypes.default.func.isRequired,
-  dataMapper: _propTypes.default.func,
-  errorHandler: _propTypes.default.func
-};
-
-var _default = (0, _react.memo)(Fetcher);
+var _default = (0, _react.memo)(DynamicSelect);
 
 exports.default = _default;
-},{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services/index.js":[function(require,module,exports) {
+},{"./SelectInput":"../components/SelectInput.js","../utils/hooks/fetch":"../utils/hooks/fetch.js"}],"../components/PackageSelector.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+var _DynamicSelect = _interopRequireDefault(require("./DynamicSelect"));
+
+var _wpManagerClient = _interopRequireDefault(require("../services/wp-manager-client"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const wpManagerClient = (0, _wpManagerClient.default)({
+  user: 'test',
+  password: 'test',
+  baseURL: 'http://127.0.0.1:3000',
+  logger: {
+    trace: () => {},
+    info: () => {},
+    error: () => {}
+  }
+}); /// Wordpress commands
+
+const PackageSelector = ({
+  onSelect,
+  onSubmit
+}) => {
+  return _react.default.createElement(_DynamicSelect.default, {
+    label: "Select from predefined package",
+    selectProps: {
+      onSubmit,
+      onFocus: onSelect,
+      onChange: onSelect,
+      name: 'package'
+    },
+    hookProps: {
+      fetchData: wpManagerClient.getWordpressPackages.bind(null, 'bela')
+    },
+    toItems: data => {
+      return Object.keys(data).map(item => ({
+        label: item.toUpperCase(),
+        value: item
+      }));
+    }
+  });
+};
+
+var _default = (0, _react.memo)(PackageSelector);
+
+exports.default = _default;
+},{"./DynamicSelect":"../components/DynamicSelect.js","../services/wp-manager-client":"../services/wp-manager-client.js"}],"services-wordpress-plugins/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -513,15 +528,9 @@ var _propTypes = _interopRequireDefault(require("prop-types"));
 
 var _ink = require("ink");
 
-var _httpClient = require("../../services/http-client");
-
 var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
 
-var _Table = _interopRequireDefault(require("../../components/Table"));
-
-var _chalk = _interopRequireDefault(require("chalk"));
-
-var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
+var _PackageSelector = _interopRequireDefault(require("../../components/PackageSelector"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -529,43 +538,30 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)()); /// Get services statuses
+const wpManagerClient = (0, _wpManagerClient.default)({
+  user: 'test',
+  password: 'test',
+  baseURL: 'http://127.0.0.1:3000',
+  logger: {
+    trace: () => {},
+    info: () => {},
+    error: () => {}
+  }
+}); /// Wordpress commands
 
-const ServiceIndex = ({
-  name
-}) => _react.default.createElement(_ink.Box, {
-  flexDirection: "column",
-  width: "5000"
-}, _react.default.createElement(_Fetcher.default, {
-  fetchData: wpManagerClient.getProjectServicesStatuses.bind(null, name),
-  beforeLoadingMessage: `Get ${name} project's statuses...`,
-  dataMapper: response => {
-    return response && response.data ? response.data.map(({
-      names,
-      ports: rawPorts,
-      status: rawStatus
-    }) => {
-      const status = /Up/.test(rawStatus) ? _chalk.default.green('●') : _chalk.default.red('●');
-
-      const ports = rawPorts || _chalk.default.italic('None');
-
-      return {
-        names,
-        ports,
-        status
-      };
-    }) : {};
-  },
-  DataDisplayer: _Table.default
-}));
-
-ServiceIndex.propTypes = {
-  /// Name of the project
-  name: _propTypes.default.string.isRequired
+const Index = () => {
+  const [packageName, setPackageName] = (0, _react.useState)();
+  const {
+    exit
+  } = (0, _ink.useApp)();
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_PackageSelector.default, {
+    onSelect: setPackageName,
+    onSubmit: exit
+  }));
 };
 
-var _default = (0, _react.memo)(ServiceIndex);
+var _default = (0, _react.memo)(Index);
 
 exports.default = _default;
-},{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/Table":"../components/Table.js","../../components/Fetcher":"../components/Fetcher.js"}]},{},["services/index.js"], null)
-//# sourceMappingURL=/services/index.js.map
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/PackageSelector":"../components/PackageSelector.js"}]},{},["services-wordpress-plugins/index.js"], null)
+//# sourceMappingURL=/services-wordpress-plugins/index.js.map

@@ -45,13 +45,6 @@
 			"args": [],
 			"subCommands": [
 				{
-					"path": "services/create.js",
-					"name": "create",
-					"description": "",
-					"args": [],
-					"subCommands": []
-				},
-				{
 					"path": "services/destroy.js",
 					"name": "destroy",
 					"description": "Destroy services",
@@ -65,6 +58,13 @@
 							"positional": false
 						}
 					],
+					"subCommands": []
+				},
+				{
+					"path": "services/create.js",
+					"name": "create",
+					"description": "",
+					"args": [],
 					"subCommands": []
 				},
 				{
@@ -109,6 +109,28 @@
 			"subCommands": [
 				{
 					"path": "services-wordpress/install.js",
+					"name": "install",
+					"description": "",
+					"args": [],
+					"subCommands": []
+				},
+				{
+					"path": "services-wordpress/install_plugins.js",
+					"name": "install_plugins",
+					"description": "",
+					"args": [],
+					"subCommands": []
+				}
+			]
+		},
+		{
+			"path": "services-wordpress-plugins/index.js",
+			"name": "services-wordpress-plugins",
+			"description": "",
+			"args": [],
+			"subCommands": [
+				{
+					"path": "services-wordpress-plugins/install.js",
 					"name": "install",
 					"description": "",
 					"args": [],

@@ -9,13 +9,11 @@ const LoadingIndicator = ({ isLoading, loadingMessage = 'Fetching data from serv
             isLoading
             ?
             <Box>
-                <Text bold>{loadingMessage}</Text>
                 <Color green><Spinner type="point" /></Color>
+                <Text bold>{loadingMessage}</Text>
             </Box>
             :
-            <Box>
-                <Text> </Text>
-            </Box>
+            ''
         }
     </Fragment>
 )

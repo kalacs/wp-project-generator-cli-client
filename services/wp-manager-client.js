@@ -25,5 +25,7 @@ export default function createWPManagerClient({
         stopProjectServices: name => (client.makeEndpointWithAuth(`/wordpress-project/${name}/services`)).post({ command: 'stop' }),
         createProjectServices: name => (client.makeEndpointWithAuth(`/wordpress-project/${name}/services`)).post({ command: 'up' }),
         installProjectServiceWordpress: params => (client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`)).post(params),
-    }
+        installWordpressPlugins: params => (client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress/plugins`)).post(params),
+        getWordpressPackages: name => (client.makeEndpointWithAuth(`/wordpress-project/${name}/services/wordpress/packages`)).get(),
+      }
 }

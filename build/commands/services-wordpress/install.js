@@ -315,7 +315,9 @@ function createWPManagerClient({
     createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
       command: 'up'
     }),
-    installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params)
+    installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params),
+    installWordpressPlugins: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress/plugins`).post(params),
+    getWordpressPackages: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services/wordpress/packages`).get()
   };
 }
 },{"../services/http-client":"../services/http-client.js"}],"../components/TextInput.js":[function(require,module,exports) {
@@ -594,13 +596,13 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 const LoadingIndicator = ({
   isLoading,
   loadingMessage = 'Fetching data from server'
-}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
-  bold: true
-}, loadingMessage), _react.default.createElement(_ink.Color, {
+}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
   green: true
 }, _react.default.createElement(_inkSpinner.default, {
   type: "point"
-}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, " ")));
+})), _react.default.createElement(_ink.Text, {
+  bold: true
+}, loadingMessage)) : '');
 
 LoadingIndicator.propTypes = {
   isLoading: _propTypes.default.bool.isRequired,
