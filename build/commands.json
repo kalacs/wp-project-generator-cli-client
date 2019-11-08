@@ -45,6 +45,13 @@
 			"args": [],
 			"subCommands": [
 				{
+					"path": "services/create.js",
+					"name": "create",
+					"description": "",
+					"args": [],
+					"subCommands": []
+				},
+				{
 					"path": "services/destroy.js",
 					"name": "destroy",
 					"description": "Destroy services",
@@ -58,13 +65,6 @@
 							"positional": false
 						}
 					],
-					"subCommands": []
-				},
-				{
-					"path": "services/create.js",
-					"name": "create",
-					"description": "",
-					"args": [],
 					"subCommands": []
 				},
 				{

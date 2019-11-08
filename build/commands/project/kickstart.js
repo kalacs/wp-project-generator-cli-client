@@ -446,7 +446,8 @@ function createWPManagerClient({
     }),
     installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params),
     installWordpressPlugins: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress/plugins`).post(params),
-    getWordpressPackages: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services/wordpress/packages`).get()
+    getWordpressPackages: () => client.makeEndpointWithAuth(`/wordpress-project/packages`).get(),
+    getWordpressPackagesContent: packageName => client.makeEndpointWithAuth(`/wordpress-project/packages/${packageName}`).get()
   };
 }
 },{"../services/http-client":"../services/http-client.js"}],"../components/TextInput.js":[function(require,module,exports) {
@@ -674,29 +675,31 @@ const FormField = ({
 }, ({
   input,
   meta
-}) => _react.default.createElement(_ink.Box, {
-  flexDirection: "column"
-}, _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
-  bold: isActive
-}, label, ": "), isActive ? _react.default.createElement(Input, _extends({}, input, inputConfig, {
-  placeholder: placeholder,
-  onSubmit: () => {
-    onSubmit({
-      input,
-      meta
-    });
-  }
-})) : input.value && _react.default.createElement(_ink.Text, null, input.value) || placeholder && _react.default.createElement(_ink.Color, {
-  gray: true
-}, placeholder), meta.invalid && meta.touched && _react.default.createElement(_ink.Box, {
-  marginLeft: 2
-}, _react.default.createElement(_ink.Color, {
-  red: true
-}, "\u2716")), meta.valid && meta.touched && meta.inactive && _react.default.createElement(_ink.Box, {
-  marginLeft: 2
-}, _react.default.createElement(_ink.Color, {
-  green: true
-}, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error)));
+}) => {
+  return _react.default.createElement(_ink.Box, {
+    flexDirection: "column"
+  }, _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
+    bold: isActive
+  }, label, ": "), isActive ? _react.default.createElement(Input, _extends({}, input, inputConfig, meta.data.inputConfig, {
+    placeholder: placeholder,
+    onSubmit: () => {
+      onSubmit({
+        input,
+        meta
+      });
+    }
+  })) : input.value && _react.default.createElement(_ink.Text, null, input.value) || placeholder && _react.default.createElement(_ink.Color, {
+    gray: true
+  }, placeholder), meta.invalid && meta.touched && _react.default.createElement(_ink.Box, {
+    marginLeft: 2
+  }, _react.default.createElement(_ink.Color, {
+    red: true
+  }, "\u2716")), meta.valid && meta.touched && meta.inactive && _react.default.createElement(_ink.Box, {
+    marginLeft: 2
+  }, _react.default.createElement(_ink.Color, {
+    green: true
+  }, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error));
+});
 
 var _default = FormField;
 exports.default = _default;

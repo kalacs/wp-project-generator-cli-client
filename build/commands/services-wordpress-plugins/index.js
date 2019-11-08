@@ -317,10 +317,43 @@ function createWPManagerClient({
     }),
     installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params),
     installWordpressPlugins: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress/plugins`).post(params),
-    getWordpressPackages: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services/wordpress/packages`).get()
+    getWordpressPackages: () => client.makeEndpointWithAuth(`/wordpress-project/packages`).get(),
+    getWordpressPackagesContent: packageName => client.makeEndpointWithAuth(`/wordpress-project/packages/${packageName}`).get()
   };
 }
-},{"../services/http-client":"../services/http-client.js"}],"../components/SelectInput.js":[function(require,module,exports) {
+},{"../services/http-client":"../services/http-client.js"}],"../components/TextInput.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = TextInput;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _inkTextInput = _interopRequireDefault(require("ink-text-input"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+function TextInput(_ref) {
+  let {
+    onBlur,
+    onFocus
+  } = _ref,
+      props = _objectWithoutProperties(_ref, ["onBlur", "onFocus"]);
+
+  _react.default.useEffect(() => {
+    onFocus();
+    return onBlur;
+  }, [onFocus, onBlur]);
+
+  return _react.default.createElement(_inkTextInput.default, props);
+}
+},{}],"../components/SelectInput.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -363,7 +396,185 @@ function SelectInput(_ref) {
     }
   }));
 }
-},{}],"../utils/hooks/fetch.js":[function(require,module,exports) {
+},{}],"../components/MultiSelectInput.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = MultiSelectInput;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _inkMultiSelect = _interopRequireDefault(require("ink-multi-select"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+function MultiSelectInput(_ref) {
+  let {
+    onBlur,
+    onChange,
+    onFocus,
+    value = []
+  } = _ref,
+      props = _objectWithoutProperties(_ref, ["onBlur", "onChange", "onFocus", "value"]);
+
+  _react.default.useEffect(() => {
+    onFocus();
+    return onBlur;
+  }, [onFocus, onBlur]);
+
+  return _react.default.createElement(_inkMultiSelect.default, _extends({}, props, {
+    onSelect: ({
+      value: v
+    }) => onChange(value.concat(v)),
+    onUnselect: ({
+      value: v
+    }) => onChange(value.filter(item => item !== v))
+  }));
+}
+},{}],"../utils/factories/field-creators.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createMultiSelectInput = exports.createSelectInput = exports.createTextInput = void 0;
+
+var _TextInput = _interopRequireDefault(require("../../components/TextInput"));
+
+var _SelectInput = _interopRequireDefault(require("../../components/SelectInput"));
+
+var _MultiSelectInput = _interopRequireDefault(require("../../components/MultiSelectInput"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const createTextInput = (name, label, placeholder = '', format = value => value || '', validate = () => undefined) => ({
+  name,
+  label,
+  placeholder,
+  format,
+  validate,
+  Input: _TextInput.default
+});
+
+exports.createTextInput = createTextInput;
+
+const createSelectInput = (name, label, inputConfig, format = value => value || '', validate = () => undefined) => ({
+  name,
+  label,
+  inputConfig,
+  format,
+  validate,
+  Input: _SelectInput.default
+});
+
+exports.createSelectInput = createSelectInput;
+
+const createMultiSelectInput = (name, label, inputConfig, format = value => value, validate = undefined) => ({
+  name,
+  label,
+  inputConfig,
+  format,
+  validate,
+  Input: _MultiSelectInput.default
+});
+
+exports.createMultiSelectInput = createMultiSelectInput;
+},{"../../components/TextInput":"../components/TextInput.js","../../components/SelectInput":"../components/SelectInput.js","../../components/MultiSelectInput":"../components/MultiSelectInput.js"}],"../components/Error.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Error;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _ink = require("ink");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function Error({
+  children
+}) {
+  return _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
+    red: true
+  }, children));
+}
+},{}],"../components/FormField.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _reactFinalForm = require("react-final-form");
+
+var _ink = require("ink");
+
+var _Error = _interopRequireDefault(require("../components/Error"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+const FormField = ({
+  name,
+  label,
+  placeholder,
+  format,
+  validate,
+  Input,
+  inputConfig,
+  onSubmit,
+  isActive
+}) => _react.default.createElement(_reactFinalForm.Field, {
+  name: name,
+  key: name,
+  format: format,
+  validate: validate
+}, ({
+  input,
+  meta
+}) => {
+  return _react.default.createElement(_ink.Box, {
+    flexDirection: "column"
+  }, _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
+    bold: isActive
+  }, label, ": "), isActive ? _react.default.createElement(Input, _extends({}, input, inputConfig, meta.data.inputConfig, {
+    placeholder: placeholder,
+    onSubmit: () => {
+      onSubmit({
+        input,
+        meta
+      });
+    }
+  })) : input.value && _react.default.createElement(_ink.Text, null, input.value) || placeholder && _react.default.createElement(_ink.Color, {
+    gray: true
+  }, placeholder), meta.invalid && meta.touched && _react.default.createElement(_ink.Box, {
+    marginLeft: 2
+  }, _react.default.createElement(_ink.Color, {
+    red: true
+  }, "\u2716")), meta.valid && meta.touched && meta.inactive && _react.default.createElement(_ink.Box, {
+    marginLeft: 2
+  }, _react.default.createElement(_ink.Color, {
+    green: true
+  }, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error));
+});
+
+var _default = FormField;
+exports.default = _default;
+},{"../components/Error":"../components/Error.js"}],"../utils/hooks/fetch.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -399,7 +610,7 @@ const fetchHook = ({
 
 var _default = fetchHook;
 exports.default = _default;
-},{}],"../components/DynamicSelect.js":[function(require,module,exports) {
+},{}],"services-wordpress-plugins/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -409,11 +620,19 @@ exports.default = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
+var _reactFinalForm = require("react-final-form");
+
 var _ink = require("ink");
 
-var _SelectInput = _interopRequireDefault(require("./SelectInput"));
+var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
 
-var _fetch = _interopRequireDefault(require("../utils/hooks/fetch"));
+var _fieldCreators = require("../../utils/factories/field-creators");
+
+var _FormField = _interopRequireDefault(require("../../components/FormField"));
+
+var _fetch = _interopRequireDefault(require("../../utils/hooks/fetch"));
+
+var _finalFormSetFieldData = _interopRequireDefault(require("final-form-set-field-data"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -423,59 +642,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-const DynamicSelect = ({
-  label,
-  selectProps,
-  hookProps,
-  toItems = () => []
-}) => {
-  const {
-    onSuccess = () => {},
-    onLoad = () => {},
-    onFailed = () => {},
-    fetchData = () => {}
-  } = hookProps;
-  const [items, setItems] = (0, _react.useState)([]);
-  (0, _react.useEffect)((0, _fetch.default)({
-    onSuccess: ({
-      data
-    }) => setItems(toItems(data)),
-    onLoad,
-    onFailed: error => console.log('ERROR', error),
-    fetchData
-  }), []);
-  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Text, {
-    bold: true
-  }, label), _react.default.createElement(_SelectInput.default, _extends({}, selectProps, {
-    items: items
-  })));
-};
-
-var _default = (0, _react.memo)(DynamicSelect);
-
-exports.default = _default;
-},{"./SelectInput":"../components/SelectInput.js","../utils/hooks/fetch":"../utils/hooks/fetch.js"}],"../components/PackageSelector.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _react = _interopRequireWildcard(require("react"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-var _DynamicSelect = _interopRequireDefault(require("./DynamicSelect"));
-
-var _wpManagerClient = _interopRequireDefault(require("../services/wp-manager-client"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
 const wpManagerClient = (0, _wpManagerClient.default)({
   user: 'test',
   password: 'test',
@@ -485,83 +651,130 @@ const wpManagerClient = (0, _wpManagerClient.default)({
     info: () => {},
     error: () => {}
   }
-}); /// Wordpress commands
+});
 
-const PackageSelector = ({
-  onSelect,
-  onSubmit
+const isRequired = value => !value ? 'Required' : undefined;
+
+const noFormatNoPlaceholderRequired = (name, label) => [name, label, '', undefined, isRequired];
+
+const getPackage = name => data => data[name];
+
+const transformForPackage = data => ({
+  items: Object.keys(data).map(item => ({
+    label: item.toUpperCase(),
+    value: item
+  }))
+});
+
+const transformForContent = contentType => data => contentType in data && data[contentType] ? data[contentType].map(item => ({
+  label: item.name,
+  value: item.path
+})) : []; /// Install generated and started wordpress
+
+
+const Install = ({
+  initialValues,
+  onData
 }) => {
-  return _react.default.createElement(_DynamicSelect.default, {
-    label: "Select from predefined package",
-    selectProps: {
-      onSubmit,
-      onFocus: onSelect,
-      onChange: onSelect,
-      name: 'package'
-    },
-    hookProps: {
-      fetchData: wpManagerClient.getWordpressPackages.bind(null, 'bela')
-    },
-    toItems: data => {
-      return Object.keys(data).map(item => ({
-        label: item.toUpperCase(),
-        value: item
-      }));
-    }
+  const [activeField, setActiveField] = _react.default.useState(0);
+
+  const [submission, setSubmission] = _react.default.useState();
+
+  const [packageData, setPackageData] = _react.default.useState({});
+
+  const [packages, setPackages] = _react.default.useState({
+    items: []
   });
+
+  const [plugins, setPlugins] = _react.default.useState({
+    items: []
+  });
+
+  const [themes, setThemes] = _react.default.useState({
+    items: []
+  });
+
+  (0, _react.useEffect)((0, _fetch.default)({
+    onSuccess: response => {
+      if (response) {
+        setPackageData(response.data);
+        setPackages(transformForPackage(response.data));
+      }
+    },
+    onFailed: error => console.log('ERROR', error),
+    fetchData: wpManagerClient.getWordpressPackages,
+    onLoad: () => {}
+  }), []);
+  const fields = [(0, _fieldCreators.createSelectInput)('package', 'Package', packages), (0, _fieldCreators.createMultiSelectInput)('plugins', 'Plugins'), (0, _fieldCreators.createSelectInput)('theme', 'Theme', themes)];
+  return _react.default.createElement(_react.Fragment, null, !submission ? _react.default.createElement(_reactFinalForm.Form, {
+    onSubmit: setSubmission,
+    initialValues: initialValues,
+    mutators: {
+      setFieldData: _finalFormSetFieldData.default
+    }
+  }, ({
+    handleSubmit,
+    validating,
+    form
+  }) => {
+    const packageState = form.getFieldState('package');
+    const selectedPackage = packageState && 'value' in packageState ? packageState.value : '';
+
+    if (selectedPackage) {
+      form.mutators.setFieldData('plugins', {
+        inputConfig: {
+          items: transformForContent('plugins')(getPackage(selectedPackage)(packageData))
+        }
+      });
+      form.mutators.setFieldData('theme', {
+        inputConfig: {
+          items: transformForContent('themes')(getPackage(selectedPackage)(packageData))
+        }
+      });
+    }
+
+    return _react.default.createElement(_ink.Box, {
+      flexDirection: "column"
+    }, fields.map(({
+      name,
+      label,
+      placeholder,
+      format,
+      validate,
+      Input,
+      inputConfig
+    }, index) => _react.default.createElement(_FormField.default, _extends({
+      key: name
+    }, {
+      name,
+      label,
+      placeholder,
+      format,
+      validate,
+      Input,
+      inputConfig,
+      isActive: activeField === index,
+      onSubmit: ({
+        meta,
+        input
+      }) => {
+        if (meta.valid && !validating) {
+          setActiveField(value => value + 1); // go to next field
+
+          if (activeField === fields.length - 1) {
+            // last field, so submit
+            handleSubmit();
+          }
+        } else {
+          input.onBlur(); // mark as touched to show error
+        }
+      }
+    }))));
+  }) : JSON.stringify(submission));
 };
 
-var _default = (0, _react.memo)(PackageSelector);
+var _default = (0, _react.memo)(Install);
 
 exports.default = _default;
-},{"./DynamicSelect":"../components/DynamicSelect.js","../services/wp-manager-client":"../services/wp-manager-client.js"}],"services-wordpress-plugins/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _react = _interopRequireWildcard(require("react"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-var _ink = require("ink");
-
-var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
-
-var _PackageSelector = _interopRequireDefault(require("../../components/PackageSelector"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-const wpManagerClient = (0, _wpManagerClient.default)({
-  user: 'test',
-  password: 'test',
-  baseURL: 'http://127.0.0.1:3000',
-  logger: {
-    trace: () => {},
-    info: () => {},
-    error: () => {}
-  }
-}); /// Wordpress commands
-
-const Index = () => {
-  const [packageName, setPackageName] = (0, _react.useState)();
-  const {
-    exit
-  } = (0, _ink.useApp)();
-  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_PackageSelector.default, {
-    onSelect: setPackageName,
-    onSubmit: exit
-  }));
-};
-
-var _default = (0, _react.memo)(Index);
-
-exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/PackageSelector":"../components/PackageSelector.js"}]},{},["services-wordpress-plugins/index.js"], null)
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../utils/hooks/fetch":"../utils/hooks/fetch.js"}]},{},["services-wordpress-plugins/index.js"], null)
 //# sourceMappingURL=/services-wordpress-plugins/index.js.map
