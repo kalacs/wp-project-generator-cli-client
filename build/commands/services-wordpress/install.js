@@ -315,7 +315,11 @@ function createWPManagerClient({
     createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
       command: 'up'
     }),
-    installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params)
+    installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params),
+    installWordpressPlugins: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress/plugins`).post(params),
+    installWordpressTheme: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress/theme`).post(params),
+    getWordpressPackages: () => client.makeEndpointWithAuth(`/wordpress-project/packages`).get(),
+    getWordpressPackagesContent: packageName => client.makeEndpointWithAuth(`/wordpress-project/packages/${packageName}`).get()
   };
 }
 },{"../services/http-client":"../services/http-client.js"}],"../components/TextInput.js":[function(require,module,exports) {
@@ -543,33 +547,77 @@ const FormField = ({
 }, ({
   input,
   meta
-}) => _react.default.createElement(_ink.Box, {
-  flexDirection: "column"
-}, _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
-  bold: isActive
-}, label, ": "), isActive ? _react.default.createElement(Input, _extends({}, input, inputConfig, {
-  placeholder: placeholder,
-  onSubmit: () => {
-    onSubmit({
-      input,
-      meta
-    });
-  }
-})) : input.value && _react.default.createElement(_ink.Text, null, input.value) || placeholder && _react.default.createElement(_ink.Color, {
-  gray: true
-}, placeholder), meta.invalid && meta.touched && _react.default.createElement(_ink.Box, {
-  marginLeft: 2
-}, _react.default.createElement(_ink.Color, {
-  red: true
-}, "\u2716")), meta.valid && meta.touched && meta.inactive && _react.default.createElement(_ink.Box, {
-  marginLeft: 2
-}, _react.default.createElement(_ink.Color, {
-  green: true
-}, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error)));
+}) => {
+  return _react.default.createElement(_ink.Box, {
+    flexDirection: "column"
+  }, _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
+    bold: isActive
+  }, label, ": "), isActive ? _react.default.createElement(Input, _extends({}, input, inputConfig, meta.data.inputConfig, {
+    placeholder: placeholder,
+    onSubmit: () => {
+      onSubmit({
+        input,
+        meta
+      });
+    }
+  })) : input.value && _react.default.createElement(_ink.Text, null, input.value) || placeholder && _react.default.createElement(_ink.Color, {
+    gray: true
+  }, placeholder), meta.invalid && meta.touched && _react.default.createElement(_ink.Box, {
+    marginLeft: 2
+  }, _react.default.createElement(_ink.Color, {
+    red: true
+  }, "\u2716")), meta.valid && meta.touched && meta.inactive && _react.default.createElement(_ink.Box, {
+    marginLeft: 2
+  }, _react.default.createElement(_ink.Color, {
+    green: true
+  }, "\u2714"))), meta.error && meta.touched && _react.default.createElement(_Error.default, null, meta.error));
+});
 
 var _default = FormField;
 exports.default = _default;
-},{"../components/Error":"../components/Error.js"}],"../components/LoadingIndicator.js":[function(require,module,exports) {
+},{"../components/Error":"../components/Error.js"}],"../utils/hooks/data-api.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = require("react");
+
+var _util = require("util");
+
+const useDataAPI = () => {
+  const [isLoading, setIsLoading] = (0, _react.useState)(false);
+  const [data, setData] = (0, _react.useState)({});
+  const [error, setError] = (0, _react.useState)(null);
+  const [fetcher, setFetcher] = (0, _react.useState)();
+  (0, _react.useEffect)(() => {
+    async function fetch() {
+      try {
+        setError(null);
+        setIsLoading(true);
+        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : {};
+        setData(response.data);
+        setIsLoading(false);
+      } catch (error) {
+        setError(error);
+        setIsLoading(false);
+      }
+    }
+
+    fetch();
+  }, [fetcher]);
+  return [{
+    data,
+    isLoading,
+    error
+  }, setFetcher];
+};
+
+var _default = useDataAPI;
+exports.default = _default;
+},{}],"../components/LoadingIndicator.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -594,13 +642,13 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 const LoadingIndicator = ({
   isLoading,
   loadingMessage = 'Fetching data from server'
-}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
-  bold: true
-}, loadingMessage), _react.default.createElement(_ink.Color, {
+}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
   green: true
 }, _react.default.createElement(_inkSpinner.default, {
-  type: "point"
-}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, " ")));
+  type: "arrow"
+})), ' ', _react.default.createElement(_ink.Text, {
+  bold: true
+}, loadingMessage)) : '');
 
 LoadingIndicator.propTypes = {
   isLoading: _propTypes.default.bool.isRequired,
@@ -608,7 +656,7 @@ LoadingIndicator.propTypes = {
 };
 var _default = LoadingIndicator;
 exports.default = _default;
-},{}],"../components/Fetcher.js":[function(require,module,exports) {
+},{}],"../components/FetchHandler.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -617,8 +665,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
 
 var _ink = require("ink");
 
@@ -630,73 +676,25 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-const DisplayData = ({
-  data
-}) => _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
-
-const DisplayError = ({
-  error
-}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
-  red: true
-}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
-
-const Fetcher = ({
-  beforeLoadingMessage,
-  DataDisplayer = DisplayData,
-  ErrorDisplayer = DisplayError,
-  fetchData,
-  dataMapper = data => data,
-  errorHandler = error => error.toString()
+const FetchHandler = ({
+  onLoadMessage,
+  onSuccessMessage,
+  onErrorMessage,
+  hasError = false,
+  hasBeenLoaded = false,
+  isLoading = false
 }) => {
-  const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)();
-  const [error, setError] = (0, _react.useState)('');
-  const onLoad = setIsLoading;
-
-  const onData = response => {
-    setData(dataMapper(response));
-  };
-
-  const onError = error => {
-    setError(errorHandler(error));
-  };
-
-  (0, _react.useEffect)(() => {
-    async function fetch() {
-      try {
-        onLoad(true);
-        const response = await fetchData.call();
-        onData(response);
-        onLoad(false);
-      } catch (error) {
-        onLoad(false);
-        onData(null);
-        onError(error);
-      }
-    }
-
-    fetch();
-  }, [fetchData]);
-  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
+  return _react.default.createElement(_react.Fragment, null, !hasBeenLoaded ? _react.default.createElement(_LoadingIndicator.default, {
     isLoading: isLoading,
-    loadingMessage: beforeLoadingMessage
-  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
-    data: data
-  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
-    error: error
-  })));
+    loadingMessage: onLoadMessage
+  }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+    red: true
+  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+    green: true
+  }, "\u2714 "), onSuccessMessage));
 };
 
-Fetcher.propTypes = {
-  afterLoadingMessage: _propTypes.default.string,
-  beforeLoadingMessage: _propTypes.default.string,
-  fetchData: _propTypes.default.func.isRequired,
-  dataMapper: _propTypes.default.func,
-  errorHandler: _propTypes.default.func
-};
-
-var _default = (0, _react.memo)(Fetcher);
-
+var _default = FetchHandler;
 exports.default = _default;
 },{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services-wordpress/install.js":[function(require,module,exports) {
 "use strict";
@@ -718,7 +716,11 @@ var _fieldCreators = require("../../utils/factories/field-creators");
 
 var _FormField = _interopRequireDefault(require("../../components/FormField"));
 
-var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
+var _httpClient = require("../../services/http-client");
+
+var _dataApi = _interopRequireDefault(require("../../utils/hooks/data-api"));
+
+var _FetchHandler = _interopRequireDefault(require("../../components/FetchHandler"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -728,33 +730,32 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-const wpManagerClient = (0, _wpManagerClient.default)({
-  user: 'test',
-  password: 'test',
-  baseURL: 'http://127.0.0.1:3000',
-  logger: {
-    trace: () => {},
-    info: () => {},
-    error: () => {}
-  }
-});
+const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)());
 
-const isRequired = value => !value ? 'Required' : undefined;
+const isRequired = value => !value ? "Required" : undefined;
 
-const noFormatNoPlaceholderRequired = (name, label) => [name, label, '', undefined, isRequired];
+const noFormatNoPlaceholderRequired = (name, label) => [name, label, "", undefined, isRequired];
 
-const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('projectPrefix', 'Project name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('container', 'Container name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('network', 'Network name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('url', 'WP Url')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('title', 'Title')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminName', 'Admin name')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminPassword', 'Admin password')), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired('adminEmail', 'Admin email'))]; /// Install generated and started wordpress
+const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("projectPrefix", "Project name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("container", "Container name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("network", "Network name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("url", "WP Url")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("title", "Title")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminName", "Admin name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminPassword", "Admin password")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminEmail", "Admin email"))]; /// Install generated and started wordpress
 
 const Install = ({
-  initialValues,
-  onData
+  initialValues = {},
+  onData = () => {}
 }) => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
-  const [submission, setSubmission] = _react.default.useState();
-
+  const [formData, setFormData] = (0, _react.useState)();
+  const [{
+    data,
+    error,
+    isLoading
+  }, setFetcher] = (0, _dataApi.default)();
   return _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: setSubmission,
+    onSubmit: data => {
+      setFormData(data);
+      setFetcher(() => wpManagerClient.installProjectServiceWordpress.bind(null, data));
+      onData(data);
+    },
     initialValues: initialValues
   }, ({
     handleSubmit,
@@ -795,18 +796,18 @@ const Install = ({
         input.onBlur(); // mark as touched to show error
       }
     }
-  }))), submission ? _react.default.createElement(_Fetcher.default, {
-    fetchData: wpManagerClient.installProjectServiceWordpress.bind(null, submission),
-    beforeLoadingMessage: `Installing WP`,
-    dataMapper: response => {
-      onData(submission);
-      return response && response.status === 200 ? 'Worpress installed!' : 'Something went wrong';
-    }
-  }) : ''));
+  }))), formData ? _react.default.createElement(_FetchHandler.default, {
+    onErrorMessage: "Something went wrong",
+    onLoadMessage: `Installing WP`,
+    onSuccessMessage: "Worpress installed.",
+    isLoading: isLoading,
+    hasBeenLoaded: data || error,
+    hasError: error !== null
+  }) : ""));
 };
 
 var _default = (0, _react.memo)(Install);
 
 exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../components/Fetcher":"../components/Fetcher.js"}]},{},["services-wordpress/install.js"], null)
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../services/http-client":"../services/http-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}]},{},["services-wordpress/install.js"], null)
 //# sourceMappingURL=/services-wordpress/install.js.map

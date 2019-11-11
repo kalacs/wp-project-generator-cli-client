@@ -315,10 +315,56 @@ function createWPManagerClient({
     createProjectServices: name => client.makeEndpointWithAuth(`/wordpress-project/${name}/services`).post({
       command: 'up'
     }),
-    installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params)
+    installProjectServiceWordpress: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress`).post(params),
+    installWordpressPlugins: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress/plugins`).post(params),
+    installWordpressTheme: params => client.makeEndpointWithAuth(`/wordpress-project/${params.projectPrefix}/services/wordpress/theme`).post(params),
+    getWordpressPackages: () => client.makeEndpointWithAuth(`/wordpress-project/packages`).get(),
+    getWordpressPackagesContent: packageName => client.makeEndpointWithAuth(`/wordpress-project/packages/${packageName}`).get()
   };
 }
-},{"../services/http-client":"../services/http-client.js"}],"../components/LoadingIndicator.js":[function(require,module,exports) {
+},{"../services/http-client":"../services/http-client.js"}],"../utils/hooks/data-api.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = require("react");
+
+var _util = require("util");
+
+const useDataAPI = () => {
+  const [isLoading, setIsLoading] = (0, _react.useState)(false);
+  const [data, setData] = (0, _react.useState)({});
+  const [error, setError] = (0, _react.useState)(null);
+  const [fetcher, setFetcher] = (0, _react.useState)();
+  (0, _react.useEffect)(() => {
+    async function fetch() {
+      try {
+        setError(null);
+        setIsLoading(true);
+        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : {};
+        setData(response.data);
+        setIsLoading(false);
+      } catch (error) {
+        setError(error);
+        setIsLoading(false);
+      }
+    }
+
+    fetch();
+  }, [fetcher]);
+  return [{
+    data,
+    isLoading,
+    error
+  }, setFetcher];
+};
+
+var _default = useDataAPI;
+exports.default = _default;
+},{}],"../components/LoadingIndicator.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -343,13 +389,13 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 const LoadingIndicator = ({
   isLoading,
   loadingMessage = 'Fetching data from server'
-}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, {
-  bold: true
-}, loadingMessage), _react.default.createElement(_ink.Color, {
+}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
   green: true
 }, _react.default.createElement(_inkSpinner.default, {
-  type: "point"
-}))) : _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Text, null, " ")));
+  type: "arrow"
+})), ' ', _react.default.createElement(_ink.Text, {
+  bold: true
+}, loadingMessage)) : '');
 
 LoadingIndicator.propTypes = {
   isLoading: _propTypes.default.bool.isRequired,
@@ -357,7 +403,7 @@ LoadingIndicator.propTypes = {
 };
 var _default = LoadingIndicator;
 exports.default = _default;
-},{}],"../components/Fetcher.js":[function(require,module,exports) {
+},{}],"../components/FetchHandler.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -366,8 +412,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
 
 var _ink = require("ink");
 
@@ -379,73 +423,25 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-const DisplayData = ({
-  data
-}) => _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
-
-const DisplayError = ({
-  error
-}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
-  red: true
-}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
-
-const Fetcher = ({
-  beforeLoadingMessage,
-  DataDisplayer = DisplayData,
-  ErrorDisplayer = DisplayError,
-  fetchData,
-  dataMapper = data => data,
-  errorHandler = error => error.toString()
+const FetchHandler = ({
+  onLoadMessage,
+  onSuccessMessage,
+  onErrorMessage,
+  hasError = false,
+  hasBeenLoaded = false,
+  isLoading = false
 }) => {
-  const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)();
-  const [error, setError] = (0, _react.useState)('');
-  const onLoad = setIsLoading;
-
-  const onData = response => {
-    setData(dataMapper(response));
-  };
-
-  const onError = error => {
-    setError(errorHandler(error));
-  };
-
-  (0, _react.useEffect)(() => {
-    async function fetch() {
-      try {
-        onLoad(true);
-        const response = await fetchData.call();
-        onData(response);
-        onLoad(false);
-      } catch (error) {
-        onLoad(false);
-        onData(null);
-        onError(error);
-      }
-    }
-
-    fetch();
-  }, [fetchData]);
-  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
+  return _react.default.createElement(_react.Fragment, null, !hasBeenLoaded ? _react.default.createElement(_LoadingIndicator.default, {
     isLoading: isLoading,
-    loadingMessage: beforeLoadingMessage
-  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
-    data: data
-  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
-    error: error
-  })));
+    loadingMessage: onLoadMessage
+  }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+    red: true
+  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+    green: true
+  }, "\u2714 "), onSuccessMessage));
 };
 
-Fetcher.propTypes = {
-  afterLoadingMessage: _propTypes.default.string,
-  beforeLoadingMessage: _propTypes.default.string,
-  fetchData: _propTypes.default.func.isRequired,
-  dataMapper: _propTypes.default.func,
-  errorHandler: _propTypes.default.func
-};
-
-var _default = (0, _react.memo)(Fetcher);
-
+var _default = FetchHandler;
 exports.default = _default;
 },{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services/stop.js":[function(require,module,exports) {
 "use strict";
@@ -455,34 +451,46 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _react = _interopRequireDefault(require("react"));
+var _react = _interopRequireWildcard(require("react"));
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
-
-var _ink = require("ink");
 
 var _httpClient = require("../../services/http-client");
 
 var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
 
-var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
+var _dataApi = _interopRequireDefault(require("../../utils/hooks/data-api"));
+
+var _FetchHandler = _interopRequireDefault(require("../../components/FetchHandler"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)()); /// Stop services
 
 const ServiceStop = ({
   name
-}) => _react.default.createElement(_ink.Box, {
-  flexDirection: "column",
-  width: "5000"
-}, _react.default.createElement(_Fetcher.default, {
-  fetchData: wpManagerClient.stopProjectServices.bind(null, name),
-  beforeLoadingMessage: `Stop "${name}" project's services `,
-  dataMapper: ({
-    status
-  }) => status === 200 ? 'Services have been stopped.' : 'Something went wrong'
-}));
+}) => {
+  const [{
+    data,
+    error,
+    isLoading
+  }, setFetcher] = (0, _dataApi.default)();
+  (0, _react.useEffect)(() => {
+    setFetcher(() => wpManagerClient.stopProjectServices.bind(null, name));
+  }, []);
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
+    onErrorMessage: "Something went wrong",
+    onLoadMessage: `Stop "${name}" project's services `,
+    onSuccessMessage: "Services have been stopped.",
+    isLoading: isLoading,
+    hasBeenLoaded: data || error,
+    hasError: error !== null
+  }));
+};
 
 ServiceStop.propTypes = {
   /// Name of the project
@@ -490,5 +498,5 @@ ServiceStop.propTypes = {
 };
 var _default = ServiceStop;
 exports.default = _default;
-},{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../components/Fetcher":"../components/Fetcher.js"}]},{},["services/stop.js"], null)
+},{"../../services/http-client":"../services/http-client.js","../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}]},{},["services/stop.js"], null)
 //# sourceMappingURL=/services/stop.js.map
