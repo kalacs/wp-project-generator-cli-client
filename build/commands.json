@@ -115,6 +115,21 @@
 					"subCommands": []
 				}
 			]
+		},
+		{
+			"path": "services-wordpress-package/index.js",
+			"name": "services-wordpress-package",
+			"description": "",
+			"args": [],
+			"subCommands": [
+				{
+					"path": "services-wordpress-package/install.js",
+					"name": "install",
+					"description": "",
+					"args": [],
+					"subCommands": []
+				}
+			]
 		}
 	]
 }

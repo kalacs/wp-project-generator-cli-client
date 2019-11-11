@@ -23,14 +23,15 @@ const Fetcher = ({
     dataMapper = data => data,
     errorHandler = error => error.toString(),
 }) => {
-
+    const [ isFetched, setIsFetched ] = useState(false); 
 	const [ isLoading, setIsLoading ] = useState(false);
 	const [ data, setData ] = useState();
     const [ error, setError ] = useState('');
     const onLoad = setIsLoading;
 
     const onData = response => {
-       setData(dataMapper(response));
+        setIsFetched(true);
+        setData(dataMapper(response));
     };
 
     const onError = (error) => {
@@ -49,8 +50,10 @@ const Fetcher = ({
                 onData(null);
                 onError(error)
             }
-		}
-		fetch();
+        }
+        if(!isFetched){
+            fetch();
+        }
     }, [fetchData]);
     return (
         <Fragment>

@@ -17,37 +17,40 @@ const FormField = (
     }
 ) => (
     <Field name={name} key={name} format={format} validate={validate}>
-        {({ input, meta }) => (
-            <Box flexDirection="column">
-                <Box>
-                    <Text bold={isActive}>{label}: </Text>
-                    {isActive ? (
-                        <Input
-                            {...input}
-                            {...inputConfig}
-                            placeholder={placeholder}
-                            onSubmit={() => {
-                                onSubmit({ input, meta })
-                            }}
-                        />
-                    ) : (
-                        (input.value && <Text>{input.value}</Text>) ||
-                        (placeholder && <Color gray>{placeholder}</Color>)
-                    )}
-                    {meta.invalid && meta.touched && (
-                        <Box marginLeft={2}>
-                            <Color red>✖</Color>
-                        </Box>
-                    )}
-                    {meta.valid && meta.touched && meta.inactive && (
-                        <Box marginLeft={2}>
-                            <Color green>✔</Color>
-                        </Box>
-                    )}
+        {({ input, meta }) => {
+            return (
+                <Box flexDirection="column">
+                    <Box>
+                        <Text bold={isActive}>{label}: </Text>
+                        {isActive ? (
+                            <Input
+                                {...input}
+                                {...inputConfig}
+                                {...meta.data.inputConfig}
+                                placeholder={placeholder}
+                                onSubmit={() => {
+                                    onSubmit({ input, meta })
+                                }}
+                            />
+                        ) : (
+                            (input.value && <Text>{input.value}</Text>) ||
+                            (placeholder && <Color gray>{placeholder}</Color>)
+                        )}
+                        {meta.invalid && meta.touched && (
+                            <Box marginLeft={2}>
+                                <Color red>✖</Color>
+                            </Box>
+                        )}
+                        {meta.valid && meta.touched && meta.inactive && (
+                            <Box marginLeft={2}>
+                                <Color green>✔</Color>
+                            </Box>
+                        )}
+                    </Box>
+                    {meta.error && meta.touched && <Error>{meta.error}</Error>}
                 </Box>
-                {meta.error && meta.touched && <Error>{meta.error}</Error>}
-            </Box>
-        )}
+            )
+        }}
     </Field>
 )
 

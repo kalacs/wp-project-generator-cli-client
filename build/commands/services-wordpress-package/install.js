@@ -614,7 +614,7 @@ LoadingIndicator.propTypes = {
 };
 var _default = LoadingIndicator;
 exports.default = _default;
-},{}],"../components/FetchHandler.js":[function(require,module,exports) {
+},{}],"../components/Fetcher.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -623,6 +623,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
 
 var _ink = require("ink");
 
@@ -634,25 +636,77 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-const FetchHandler = ({
-  onLoadMessage,
-  onSuccessMessage,
-  onErrorMessage,
-  hasError = false,
-  hasBeenLoaded = false,
-  isLoading = false
+const DisplayData = ({
+  data
+}) => _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
+
+const DisplayError = ({
+  error
+}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
+  red: true
+}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
+
+const Fetcher = ({
+  beforeLoadingMessage,
+  DataDisplayer = DisplayData,
+  ErrorDisplayer = DisplayError,
+  fetchData,
+  dataMapper = data => data,
+  errorHandler = error => error.toString()
 }) => {
-  return _react.default.createElement(_react.Fragment, null, !hasBeenLoaded ? _react.default.createElement(_LoadingIndicator.default, {
+  const [isFetched, setIsFetched] = (0, _react.useState)(false);
+  const [isLoading, setIsLoading] = (0, _react.useState)(false);
+  const [data, setData] = (0, _react.useState)();
+  const [error, setError] = (0, _react.useState)('');
+  const onLoad = setIsLoading;
+
+  const onData = response => {
+    setIsFetched(true);
+    setData(dataMapper(response));
+  };
+
+  const onError = error => {
+    setError(errorHandler(error));
+  };
+
+  (0, _react.useEffect)(() => {
+    async function fetch() {
+      try {
+        onLoad(true);
+        const response = await fetchData.call();
+        onData(response);
+        onLoad(false);
+      } catch (error) {
+        onLoad(false);
+        onData(null);
+        onError(error);
+      }
+    }
+
+    if (!isFetched) {
+      fetch();
+    }
+  }, [fetchData]);
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
     isLoading: isLoading,
-    loadingMessage: onLoadMessage
-  }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
-    red: true
-  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
-    green: true
-  }, "\u2714 "), onSuccessMessage));
+    loadingMessage: beforeLoadingMessage
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
+    data: data
+  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
+    error: error
+  })));
 };
 
-var _default = FetchHandler;
+Fetcher.propTypes = {
+  afterLoadingMessage: _propTypes.default.string,
+  beforeLoadingMessage: _propTypes.default.string,
+  fetchData: _propTypes.default.func.isRequired,
+  dataMapper: _propTypes.default.func,
+  errorHandler: _propTypes.default.func
+};
+
+var _default = (0, _react.memo)(Fetcher);
+
 exports.default = _default;
 },{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"../utils/hooks/data-api.js":[function(require,module,exports) {
 "use strict";
@@ -696,7 +750,47 @@ const useDataAPI = () => {
 
 var _default = useDataAPI;
 exports.default = _default;
-},{}],"project/create.js":[function(require,module,exports) {
+},{}],"../components/FetchHandler.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _ink = require("ink");
+
+var _LoadingIndicator = _interopRequireDefault(require("./LoadingIndicator"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const FetchHandler = ({
+  onLoadMessage,
+  onSuccessMessage,
+  onErrorMessage,
+  hasError = false,
+  hasBeenLoaded = false,
+  isLoading = false
+}) => {
+  return _react.default.createElement(_react.Fragment, null, !hasBeenLoaded ? _react.default.createElement(_LoadingIndicator.default, {
+    isLoading: isLoading,
+    loadingMessage: onLoadMessage
+  }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+    red: true
+  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+    green: true
+  }, "\u2714 "), onSuccessMessage));
+};
+
+var _default = FetchHandler;
+exports.default = _default;
+},{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"services-wordpress-package/install.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -716,181 +810,11 @@ var _fieldCreators = require("../../utils/factories/field-creators");
 
 var _FormField = _interopRequireDefault(require("../../components/FormField"));
 
-var _httpClient = require("../../services/http-client");
-
-var _FetchHandler = _interopRequireDefault(require("../../components/FetchHandler"));
-
-var _dataApi = _interopRequireDefault(require("../../utils/hooks/data-api"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)());
-
-const isRequired = value => !value ? "Required" : undefined;
-
-const fields = [(0, _fieldCreators.createTextInput)("project.prefix", "Project prefix", "my-awesome-project", value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, "").replace(/ /g, "-") : "", isRequired), (0, _fieldCreators.createTextInput)("project.database.name", "Database name", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.user", "Database user", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.password", "Database password", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.rootPassword", "Database root password", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.webserver.port", "Webserver port", "", undefined, isRequired)]; /// Generate new wordpress project from template
-
-const Generate = ({
-  onData = () => {}
-}) => {
-  const [activeField, setActiveField] = _react.default.useState(0);
-
-  const [formData, setFormData] = (0, _react.useState)();
-  const [{
-    data,
-    error,
-    isLoading
-  }, setFetcher] = (0, _dataApi.default)();
-  return _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
-  }, _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: data => {
-      setFormData(data);
-      setFetcher(() => wpManagerClient.createWordpressProject.bind(null, data));
-      onData(data);
-    }
-  }, ({
-    handleSubmit,
-    validating
-  }) => _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
-  }, fields.map(({
-    name,
-    label,
-    placeholder,
-    format,
-    validate,
-    Input,
-    inputConfig
-  }, index) => _react.default.createElement(_FormField.default, _extends({
-    key: name
-  }, {
-    name,
-    label,
-    placeholder,
-    format,
-    validate,
-    Input,
-    inputConfig,
-    isActive: activeField === index,
-    onSubmit: ({
-      meta,
-      input
-    }) => {
-      if (meta.valid && !validating) {
-        setActiveField(value => value + 1); // go to next field
-
-        if (activeField === fields.length - 1) {
-          // last field, so submit
-          handleSubmit();
-        }
-      } else {
-        input.onBlur(); // mark as touched to show error
-      }
-    }
-  }))))), formData ? _react.default.createElement(_FetchHandler.default, {
-    onErrorMessage: "Something went wrong",
-    onLoadMessage: `Generating project: "${formData.project.prefix}"`,
-    onSuccessMessage: "Project structure has been created.",
-    isLoading: isLoading,
-    hasBeenLoaded: data || error,
-    hasError: error !== null
-  }) : "");
-};
-
-var _default = (0, _react.memo)(Generate);
-
-exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../services/http-client":"../services/http-client.js","../../components/FetchHandler":"../components/FetchHandler.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js"}],"services/create.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _react = _interopRequireWildcard(require("react"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
+var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
 
 var _httpClient = require("../../services/http-client");
 
-var _dataApi = _interopRequireDefault(require("../../utils/hooks/data-api"));
-
-var _FetchHandler = _interopRequireDefault(require("../../components/FetchHandler"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)()); /// Create services
-
-const Create = ({
-  name,
-  onData = () => {}
-}) => {
-  const [{
-    data,
-    error,
-    isLoading
-  }, setFetcher] = (0, _dataApi.default)();
-  (0, _react.useEffect)(() => {
-    setFetcher(() => wpManagerClient.createProjectServices.bind(null, name));
-  }, []);
-
-  if (data) {
-    onData(data);
-  }
-
-  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
-    onErrorMessage: "Something went wrong",
-    onLoadMessage: `Start "${name}" project's services `,
-    onSuccessMessage: "Services have been created.",
-    isLoading: isLoading,
-    hasBeenLoaded: data || error,
-    hasError: error !== null
-  }));
-};
-
-Create.propTypes = {
-  /// Name of the project
-  name: _propTypes.default.string.isRequired
-};
-
-var _default = (0, _react.memo)(Create);
-
-exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../services/http-client":"../services/http-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}],"services-wordpress/install.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _react = _interopRequireWildcard(require("react"));
-
-var _reactFinalForm = require("react-final-form");
-
-var _ink = require("ink");
-
-var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
-
-var _fieldCreators = require("../../utils/factories/field-creators");
-
-var _FormField = _interopRequireDefault(require("../../components/FormField"));
-
-var _httpClient = require("../../services/http-client");
+var _finalFormSetFieldData = _interopRequireDefault(require("final-form-set-field-data"));
 
 var _dataApi = _interopRequireDefault(require("../../utils/hooks/data-api"));
 
@@ -906,149 +830,158 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)());
 
-const isRequired = value => !value ? "Required" : undefined;
+const getPackage = name => data => data[name];
 
-const noFormatNoPlaceholderRequired = (name, label) => [name, label, "", undefined, isRequired];
+const transformForPackage = data => ({
+  items: Object.keys(data).map(item => ({
+    label: item.toUpperCase(),
+    value: item
+  }))
+});
 
-const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("projectPrefix", "Project name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("container", "Container name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("network", "Network name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("url", "WP Url")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("title", "Title")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminName", "Admin name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminPassword", "Admin password")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminEmail", "Admin email"))]; /// Install generated and started wordpress
+const transformForContent = contentType => data => contentType in data && data[contentType] ? data[contentType].map(item => ({
+  label: item.name,
+  value: item.path
+})) : []; /// Install generated and started wordpress
 
-const Install = ({
+
+const InstallPackage = ({
+  projectName,
   initialValues = {},
   onData = () => {}
 }) => {
-  const [activeField, setActiveField] = _react.default.useState(0);
-
-  const [formData, setFormData] = (0, _react.useState)();
+  const [activeField, setActiveField] = (0, _react.useState)(0);
+  const [submission, setSubmission] = (0, _react.useState)();
+  const [packages, setPackages] = (0, _react.useState)({
+    items: []
+  });
   const [{
-    data,
-    error,
-    isLoading
+    data: packageData,
+    error: packageDataError,
+    isLoading: packageDataIsLoading
   }, setFetcher] = (0, _dataApi.default)();
-  return _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: data => {
-      setFormData(data);
-      setFetcher(() => wpManagerClient.installProjectServiceWordpress.bind(null, data));
-      onData(data);
-    },
-    initialValues: initialValues
+  const [{
+    data: pluginData,
+    error: pluginError,
+    isLoading: pluginIsLoading
+  }, submitPlugin] = (0, _dataApi.default)();
+  const [{
+    data: themeData,
+    error: themeError,
+    isLoading: themeIsLoading
+  }, submitTheme] = (0, _dataApi.default)();
+  (0, _react.useEffect)(() => {
+    setFetcher(() => wpManagerClient.getWordpressPackages);
+  }, []);
+
+  const beforeSubmission = formData => {
+    const submission = Object.assign({}, formData, {
+      container: `${formData.projectName}-wordpress`,
+      network: `${formData.projectName}-wp-network`,
+      projectPrefix: formData.projectName
+    });
+    setSubmission(submission);
+    submitPlugin(() => wpManagerClient.installWordpressPlugins.bind(null, submission));
+    submitTheme(() => wpManagerClient.installWordpressTheme.bind(null, submission));
+  };
+
+  const fields = [(0, _fieldCreators.createTextInput)("projectName", "Project name"), (0, _fieldCreators.createSelectInput)("package", "Package", packages), (0, _fieldCreators.createMultiSelectInput)("plugins", "Plugins"), (0, _fieldCreators.createSelectInput)("theme", "Theme")];
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
+    onErrorMessage: "Something went wrong",
+    onLoadMessage: "Get packages from server ...",
+    onSuccessMessage: "Request done",
+    isLoading: packageDataIsLoading,
+    hasBeenLoaded: packageData || packageDataError,
+    hasError: packageDataError !== null
+  }), _react.default.createElement(_reactFinalForm.Form, {
+    onSubmit: beforeSubmission,
+    initialValues: initialValues,
+    mutators: {
+      setFieldData: _finalFormSetFieldData.default
+    }
   }, ({
     handleSubmit,
-    validating
-  }) => _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
-  }, fields.map(({
-    name,
-    label,
-    placeholder,
-    format,
-    validate,
-    Input,
-    inputConfig
-  }, index) => _react.default.createElement(_FormField.default, _extends({
-    key: name
-  }, {
-    name,
-    label,
-    placeholder,
-    format,
-    validate,
-    Input,
-    inputConfig,
-    isActive: activeField === index,
-    onSubmit: ({
-      meta,
-      input
-    }) => {
-      if (meta.valid && !validating) {
-        setActiveField(value => value + 1); // go to next field
+    validating,
+    form
+  }) => {
+    const packageState = form.getFieldState("package");
+    const selectedPackage = packageState && "value" in packageState ? packageState.value : "";
 
-        if (activeField === fields.length - 1) {
-          // last field, so submit
-          handleSubmit();
+    if (packageData) {
+      form.mutators.setFieldData("package", {
+        inputConfig: transformForPackage(packageData)
+      });
+    }
+
+    if (selectedPackage) {
+      form.mutators.setFieldData("plugins", {
+        inputConfig: {
+          items: transformForContent("plugins")(getPackage(selectedPackage)(packageData))
         }
-      } else {
-        input.onBlur(); // mark as touched to show error
-      }
+      });
+      form.mutators.setFieldData("theme", {
+        inputConfig: {
+          items: transformForContent("themes")(getPackage(selectedPackage)(packageData))
+        }
+      });
     }
-  }))), formData ? _react.default.createElement(_FetchHandler.default, {
-    onErrorMessage: "Something went wrong",
-    onLoadMessage: `Installing WP`,
-    onSuccessMessage: "Worpress installed.",
-    isLoading: isLoading,
-    hasBeenLoaded: data || error,
-    hasError: error !== null
-  }) : ""));
+
+    return _react.default.createElement(_ink.Box, {
+      flexDirection: "column"
+    }, fields.map(({
+      name,
+      label,
+      placeholder,
+      format,
+      validate,
+      Input,
+      inputConfig
+    }, index) => _react.default.createElement(_FormField.default, _extends({
+      key: name
+    }, {
+      name,
+      label,
+      placeholder,
+      format,
+      validate,
+      Input,
+      inputConfig,
+      isActive: activeField === index,
+      onSubmit: ({
+        meta,
+        input
+      }) => {
+        if (meta.valid && !validating) {
+          setActiveField(value => value + 1); // go to next field
+
+          if (activeField === fields.length - 1) {
+            // last field, so submit
+            handleSubmit();
+          }
+        } else {
+          input.onBlur(); // mark as touched to show error
+        }
+      }
+    }))), submission ? _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
+      onErrorMessage: "Something went wrong",
+      onLoadMessage: "`Installing plugins`",
+      onSuccessMessage: "Plugins installed",
+      isLoading: pluginIsLoading,
+      hasBeenLoaded: pluginData || pluginError,
+      hasError: pluginError !== null
+    }), _react.default.createElement(_FetchHandler.default, {
+      onErrorMessage: "Something went wrong",
+      onLoadMessage: "`Installing theme`",
+      onSuccessMessage: "Theme installed",
+      isLoading: themeIsLoading,
+      hasBeenLoaded: themeData || themeError,
+      hasError: themeError !== null
+    })) : "");
+  }));
 };
 
-var _default = (0, _react.memo)(Install);
+var _default = (0, _react.memo)(InstallPackage);
 
 exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../services/http-client":"../services/http-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}],"project/kickstart.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _react = _interopRequireWildcard(require("react"));
-
-var _ink = require("ink");
-
-var _create = _interopRequireDefault(require("./create"));
-
-var _create2 = _interopRequireDefault(require("../services/create"));
-
-var _install = _interopRequireDefault(require("../services-wordpress/install"));
-
-var _inkLink = _interopRequireDefault(require("ink-link"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-const getName = data => data.project.prefix; /// Kickstart project
-
-
-const ProjectKickstart = () => {
-  const [firstTaskData, setFirstTaskData] = (0, _react.useState)();
-  const [secondTaskData, setSecondTaskData] = (0, _react.useState)();
-  const [thirdTaskData, setThirdTaskData] = (0, _react.useState)();
-
-  const getInitialValues = ({
-    project: {
-      prefix: projectPrefix,
-      webserver: {
-        port
-      }
-    }
-  }) => ({
-    projectPrefix,
-    container: `${projectPrefix}-wordpress`,
-    network: `${projectPrefix}-wp-network`,
-    url: `0.0.0.0:${port}`
-  });
-
-  return _react.default.createElement(_ink.Box, {
-    flexDirection: "column"
-  }, _react.default.createElement(_create.default, {
-    onData: setFirstTaskData
-  }), firstTaskData || secondTaskData ? _react.default.createElement(_create2.default, {
-    name: getName(firstTaskData),
-    onData: setSecondTaskData
-  }) : "", secondTaskData ? _react.default.createElement(_install.default, {
-    initialValues: getInitialValues(firstTaskData),
-    onData: setThirdTaskData
-  }) : "", thirdTaskData ? _react.default.createElement(_inkLink.default, {
-    url: `http://${thirdTaskData.url}`
-  }, _react.default.createElement(_ink.Color, {
-    green: true
-  }, "Open wordpress site")) : "");
-};
-
-var _default = ProjectKickstart;
-exports.default = _default;
-},{"./create":"project/create.js","../services/create":"services/create.js","../services-wordpress/install":"services-wordpress/install.js"}]},{},["project/kickstart.js"], null)
-//# sourceMappingURL=/project/kickstart.js.map
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../components/Fetcher":"../components/Fetcher.js","../../services/http-client":"../services/http-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}]},{},["services-wordpress-package/install.js"], null)
+//# sourceMappingURL=/services-wordpress-package/install.js.map
