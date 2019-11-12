@@ -12,7 +12,6 @@ const ServiceStart = ({ name }) => {
 	useEffect(() => {
 		setFetcher(() => wpManagerClient.startProjectServices.bind(null, name))
 	}, [])
-
 	return (
 		<Fragment>
 			<FetchHandler
@@ -20,7 +19,7 @@ const ServiceStart = ({ name }) => {
 				onLoadMessage={`Start "${name}" project's services `}
 				onSuccessMessage="Services have been started."
 				isLoading={isLoading}
-				hasBeenLoaded={data || error}
+				hasBeenLoaded={!!(data || error)}
 				hasError={error !== null}
 			/>
 		</Fragment>

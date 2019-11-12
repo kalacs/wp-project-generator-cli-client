@@ -31,20 +31,30 @@ const fields = [
 ]
 
 /// Install generated and started wordpress
-const Install = ({ initialValues = {}, onData = () => {} }) => {
+const Install = ({ initialValues = {}, onSuccess = () => null, onError = () => null }) => {
 	const [activeField, setActiveField] = React.useState(0)
 	const [formData, setFormData] = useState()
 	const [{ data, error, isLoading }, setFetcher] = useDataAPI()
 
+	if (data && data.status === 200) {
+		onSuccess(data)
+	} else {
+		onError(data)
+	}
+
+	if (error) {
+		onError(error)
+	}
+
 	return (
 		<Form
-			onSubmit={(data) => {
+			onSubmit={data => {
 				setFormData(data)
 				setFetcher(() =>
 					wpManagerClient.installProjectServiceWordpress.bind(null, data)
 				)
-				onData(data)
-			}}
+
+		}}
 			initialValues={initialValues}
 		>
 			{({ handleSubmit, validating }) => (

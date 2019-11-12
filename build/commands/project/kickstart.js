@@ -647,9 +647,9 @@ const FetchHandler = ({
     loadingMessage: onLoadMessage
   }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     red: true
-  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+  }, "\u2716", ' ', onErrorMessage)) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     green: true
-  }, "\u2714 "), onSuccessMessage));
+  }, "\u2714", ' ', onSuccessMessage)));
 };
 
 var _default = FetchHandler;
@@ -668,7 +668,7 @@ var _util = require("util");
 
 const useDataAPI = () => {
   const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)({});
+  const [data, setData] = (0, _react.useState)(null);
   const [error, setError] = (0, _react.useState)(null);
   const [fetcher, setFetcher] = (0, _react.useState)();
   (0, _react.useEffect)(() => {
@@ -676,8 +676,8 @@ const useDataAPI = () => {
       try {
         setError(null);
         setIsLoading(true);
-        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : {};
-        setData(response.data);
+        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : null;
+        setData(response);
         setIsLoading(false);
       } catch (error) {
         setError(error);
@@ -737,7 +737,8 @@ const isRequired = value => !value ? "Required" : undefined;
 const fields = [(0, _fieldCreators.createTextInput)("project.prefix", "Project prefix", "my-awesome-project", value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, "").replace(/ /g, "-") : "", isRequired), (0, _fieldCreators.createTextInput)("project.database.name", "Database name", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.user", "Database user", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.password", "Database password", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.rootPassword", "Database root password", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.webserver.port", "Webserver port", "", undefined, isRequired)]; /// Generate new wordpress project from template
 
 const Generate = ({
-  onData = () => {}
+  onSuccess = () => null,
+  onError = () => null
 }) => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
@@ -747,13 +748,23 @@ const Generate = ({
     error,
     isLoading
   }, setFetcher] = (0, _dataApi.default)();
+
+  if (data && data.status === 200) {
+    onSuccess(formData);
+  } else {
+    onError(data);
+  }
+
+  if (error) {
+    onError(error);
+  }
+
   return _react.default.createElement(_ink.Box, {
     flexDirection: "column"
   }, _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: data => {
-      setFormData(data);
-      setFetcher(() => wpManagerClient.createWordpressProject.bind(null, data));
-      onData(data);
+    onSubmit: submission => {
+      setFormData(submission);
+      setFetcher(() => wpManagerClient.createWordpressProject.bind(null, submission));
     }
   }, ({
     handleSubmit,
@@ -795,7 +806,7 @@ const Generate = ({
       }
     }
   }))))), formData ? _react.default.createElement(_FetchHandler.default, {
-    onErrorMessage: "Something went wrong",
+    onErrorMessage: `Something went wrong (${error})`,
     onLoadMessage: `Generating project: "${formData.project.prefix}"`,
     onSuccessMessage: "Project structure has been created.",
     isLoading: isLoading,
@@ -837,7 +848,8 @@ const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)
 
 const Create = ({
   name,
-  onData = () => {}
+  onSuccess = () => null,
+  onError = () => null
 }) => {
   const [{
     data,
@@ -848,8 +860,14 @@ const Create = ({
     setFetcher(() => wpManagerClient.createProjectServices.bind(null, name));
   }, []);
 
-  if (data) {
-    onData(data);
+  if (data && data.status === 200) {
+    onSuccess(data);
+  } else {
+    onError(data);
+  }
+
+  if (error) {
+    onError(error);
   }
 
   return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
@@ -914,7 +932,8 @@ const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequ
 
 const Install = ({
   initialValues = {},
-  onData = () => {}
+  onSuccess = () => null,
+  onError = () => null
 }) => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
@@ -924,11 +943,21 @@ const Install = ({
     error,
     isLoading
   }, setFetcher] = (0, _dataApi.default)();
+
+  if (data && data.status === 200) {
+    onSuccess(data);
+  } else {
+    onError(data);
+  }
+
+  if (error) {
+    onError(error);
+  }
+
   return _react.default.createElement(_reactFinalForm.Form, {
     onSubmit: data => {
       setFormData(data);
       setFetcher(() => wpManagerClient.installProjectServiceWordpress.bind(null, data));
-      onData(data);
     },
     initialValues: initialValues
   }, ({
@@ -1003,6 +1032,8 @@ var _install = _interopRequireDefault(require("../services-wordpress/install"));
 
 var _inkLink = _interopRequireDefault(require("ink-link"));
 
+var _inkDivider = _interopRequireDefault(require("ink-divider"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
@@ -1013,9 +1044,14 @@ const getName = data => data.project.prefix; /// Kickstart project
 
 
 const ProjectKickstart = () => {
-  const [firstTaskData, setFirstTaskData] = (0, _react.useState)();
-  const [secondTaskData, setSecondTaskData] = (0, _react.useState)();
-  const [thirdTaskData, setThirdTaskData] = (0, _react.useState)();
+  const [firstTaskSuccess, setFirstTaskSuccess] = (0, _react.useState)();
+  const [firstTaskError, setFirstTaskError] = (0, _react.useState)();
+  const [secondTaskSuccess, setSecondTaskSuccess] = (0, _react.useState)();
+  const [secondTaskError, setSecondTaskError] = (0, _react.useState)();
+  const [thirdTaskSuccess, setThirdTaskSuccess] = (0, _react.useState)();
+  const [thirdTaskError, setThirdTaskError] = (0, _react.useState)();
+  const [fourthTaskSuccess, setFourthTaskSuccess] = (0, _react.useState)();
+  const [fourthTaskError, setFourthTaskError] = (0, _react.useState)();
 
   const getInitialValues = ({
     project: {
@@ -1033,16 +1069,34 @@ const ProjectKickstart = () => {
 
   return _react.default.createElement(_ink.Box, {
     flexDirection: "column"
-  }, _react.default.createElement(_create.default, {
-    onData: setFirstTaskData
-  }), firstTaskData || secondTaskData ? _react.default.createElement(_create2.default, {
-    name: getName(firstTaskData),
-    onData: setSecondTaskData
-  }) : "", secondTaskData ? _react.default.createElement(_install.default, {
-    initialValues: getInitialValues(firstTaskData),
-    onData: setThirdTaskData
-  }) : "", thirdTaskData ? _react.default.createElement(_inkLink.default, {
-    url: `http://${thirdTaskData.url}`
+  }, _react.default.createElement(_ink.Box, {
+    paddingTop: 1,
+    paddingBottom: 1
+  }, _react.default.createElement(_inkDivider.default, {
+    title: "1/4. Docker service settings"
+  })), _react.default.createElement(_create.default, {
+    onSuccess: setFirstTaskSuccess,
+    onError: setFirstTaskError
+  }), firstTaskSuccess ? _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, {
+    paddingTop: 1,
+    paddingBottom: 1
+  }, _react.default.createElement(_inkDivider.default, {
+    title: "2/4. Initialize docker services"
+  })), _react.default.createElement(_create2.default, {
+    name: getName(firstTaskSuccess),
+    onSuccess: setSecondTaskSuccess,
+    onError: setSecondTaskError
+  })) : "", secondTaskSuccess ? _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, {
+    paddingTop: 1,
+    paddingBottom: 1
+  }, _react.default.createElement(_inkDivider.default, {
+    title: "3/4. Wordpress settings"
+  })), _react.default.createElement(_install.default, {
+    initialValues: getInitialValues(firstTaskSuccess),
+    onSuccess: setThirdTaskSuccess,
+    onError: setThirdTaskError
+  })) : "", thirdTaskSuccess ? _react.default.createElement(_inkLink.default, {
+    url: `http://${thirdTaskSuccess.url}`
   }, _react.default.createElement(_ink.Color, {
     green: true
   }, "Open wordpress site")) : "");
