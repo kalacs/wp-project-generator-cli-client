@@ -575,140 +575,7 @@ const FormField = ({
 
 var _default = FormField;
 exports.default = _default;
-},{"../components/Error":"../components/Error.js"}],"../components/LoadingIndicator.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _react = _interopRequireWildcard(require("react"));
-
-var _ink = require("ink");
-
-var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-const LoadingIndicator = ({
-  isLoading,
-  loadingMessage = 'Fetching data from server'
-}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
-  green: true
-}, _react.default.createElement(_inkSpinner.default, {
-  type: "arrow"
-})), ' ', _react.default.createElement(_ink.Text, {
-  bold: true
-}, loadingMessage)) : '');
-
-LoadingIndicator.propTypes = {
-  isLoading: _propTypes.default.bool.isRequired,
-  loadingMessage: _propTypes.default.string.isRequired
-};
-var _default = LoadingIndicator;
-exports.default = _default;
-},{}],"../components/Fetcher.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _react = _interopRequireWildcard(require("react"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-var _ink = require("ink");
-
-var _LoadingIndicator = _interopRequireDefault(require("./LoadingIndicator"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-const DisplayData = ({
-  data
-}) => _react.default.createElement(_react.Fragment, null, data === undefined ? _react.default.createElement(_ink.Text, null, "No data yet") : _react.default.createElement(_ink.Text, null, data));
-
-const DisplayError = ({
-  error
-}) => _react.default.createElement(_react.Fragment, null, error ? _react.default.createElement(_ink.Color, {
-  red: true
-}, _react.default.createElement(_ink.Text, null, error)) : _react.default.createElement(_ink.Text, null, " "));
-
-const Fetcher = ({
-  beforeLoadingMessage,
-  DataDisplayer = DisplayData,
-  ErrorDisplayer = DisplayError,
-  fetchData,
-  dataMapper = data => data,
-  errorHandler = error => error.toString()
-}) => {
-  const [isFetched, setIsFetched] = (0, _react.useState)(false);
-  const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)();
-  const [error, setError] = (0, _react.useState)('');
-  const onLoad = setIsLoading;
-
-  const onData = response => {
-    setIsFetched(true);
-    setData(dataMapper(response));
-  };
-
-  const onError = error => {
-    setError(errorHandler(error));
-  };
-
-  (0, _react.useEffect)(() => {
-    async function fetch() {
-      try {
-        onLoad(true);
-        const response = await fetchData.call();
-        onData(response);
-        onLoad(false);
-      } catch (error) {
-        onLoad(false);
-        onData(null);
-        onError(error);
-      }
-    }
-
-    if (!isFetched) {
-      fetch();
-    }
-  }, [fetchData]);
-  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, null, _react.default.createElement(_LoadingIndicator.default, {
-    isLoading: isLoading,
-    loadingMessage: beforeLoadingMessage
-  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(DataDisplayer, {
-    data: data
-  })), _react.default.createElement(_ink.Box, null, _react.default.createElement(ErrorDisplayer, {
-    error: error
-  })));
-};
-
-Fetcher.propTypes = {
-  afterLoadingMessage: _propTypes.default.string,
-  beforeLoadingMessage: _propTypes.default.string,
-  fetchData: _propTypes.default.func.isRequired,
-  dataMapper: _propTypes.default.func,
-  errorHandler: _propTypes.default.func
-};
-
-var _default = (0, _react.memo)(Fetcher);
-
-exports.default = _default;
-},{"./LoadingIndicator":"../components/LoadingIndicator.js"}],"../utils/hooks/data-api.js":[function(require,module,exports) {
+},{"../components/Error":"../components/Error.js"}],"../utils/hooks/data-api.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -749,6 +616,45 @@ const useDataAPI = () => {
 };
 
 var _default = useDataAPI;
+exports.default = _default;
+},{}],"../components/LoadingIndicator.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _ink = require("ink");
+
+var _inkSpinner = _interopRequireDefault(require("ink-spinner"));
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+const LoadingIndicator = ({
+  isLoading,
+  loadingMessage = 'Fetching data from server'
+}) => _react.default.createElement(_react.Fragment, null, isLoading ? _react.default.createElement(_ink.Box, null, _react.default.createElement(_ink.Color, {
+  green: true
+}, _react.default.createElement(_inkSpinner.default, {
+  type: "arrow"
+})), ' ', _react.default.createElement(_ink.Text, {
+  bold: true
+}, loadingMessage)) : '');
+
+LoadingIndicator.propTypes = {
+  isLoading: _propTypes.default.bool.isRequired,
+  loadingMessage: _propTypes.default.string.isRequired
+};
+var _default = LoadingIndicator;
 exports.default = _default;
 },{}],"../components/FetchHandler.js":[function(require,module,exports) {
 "use strict";
@@ -810,8 +716,6 @@ var _fieldCreators = require("../../utils/factories/field-creators");
 
 var _FormField = _interopRequireDefault(require("../../components/FormField"));
 
-var _Fetcher = _interopRequireDefault(require("../../components/Fetcher"));
-
 var _httpClient = require("../../services/http-client");
 
 var _finalFormSetFieldData = _interopRequireDefault(require("final-form-set-field-data"));
@@ -846,9 +750,9 @@ const transformForContent = contentType => data => contentType in data && data[c
 
 
 const InstallPackage = ({
-  projectName,
   initialValues = {},
-  onData = () => {}
+  onSuccess = () => null,
+  onError = () => null
 }) => {
   const [activeField, setActiveField] = (0, _react.useState)(0);
   const [submission, setSubmission] = (0, _react.useState)();
@@ -873,6 +777,16 @@ const InstallPackage = ({
   (0, _react.useEffect)(() => {
     setFetcher(() => wpManagerClient.getWordpressPackages);
   }, []);
+
+  if (themeData && themeData.status === 200 && pluginData && pluginData.status === 200) {
+    onSuccess(submission);
+  } else {
+    onError(themeData);
+  }
+
+  if (themeError && pluginError) {
+    onError(pluginError);
+  }
 
   const beforeSubmission = formData => {
     const submission = Object.assign({}, formData, {
@@ -909,19 +823,19 @@ const InstallPackage = ({
 
     if (packageData) {
       form.mutators.setFieldData("package", {
-        inputConfig: transformForPackage(packageData)
+        inputConfig: transformForPackage(packageData.data)
       });
     }
 
     if (selectedPackage) {
       form.mutators.setFieldData("plugins", {
         inputConfig: {
-          items: transformForContent("plugins")(getPackage(selectedPackage)(packageData))
+          items: transformForContent("plugins")(getPackage(selectedPackage)(packageData.data))
         }
       });
       form.mutators.setFieldData("theme", {
         inputConfig: {
-          items: transformForContent("themes")(getPackage(selectedPackage)(packageData))
+          items: transformForContent("themes")(getPackage(selectedPackage)(packageData.data))
         }
       });
     }
@@ -983,5 +897,5 @@ const InstallPackage = ({
 var _default = (0, _react.memo)(InstallPackage);
 
 exports.default = _default;
-},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../components/Fetcher":"../components/Fetcher.js","../../services/http-client":"../services/http-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}]},{},["services-wordpress-package/install.js"], null)
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../services/http-client":"../services/http-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}]},{},["services-wordpress-package/install.js"], null)
 //# sourceMappingURL=/services-wordpress-package/install.js.map

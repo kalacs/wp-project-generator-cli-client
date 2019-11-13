@@ -2,10 +2,10 @@ import React, { useState, Fragment } from "react"
 import { Box, Color, Text } from "ink"
 import Generate from "./create"
 import Create from "../services/create"
-import Install from "../services-wordpress/install"
+import InstallWP from "../services-wordpress/install"
 import Link from "ink-link"
 import Divider from "ink-divider"
-
+import InstallPackage from "../services-wordpress-package/install"
 const getName = (data) => data.project.prefix
 
 /// Kickstart project
@@ -56,7 +56,7 @@ const ProjectKickstart = () => {
 					<Box paddingTop={1} paddingBottom={1}>
 						<Divider title="3/4. Wordpress settings" />
 					</Box>
-					<Install
+					<InstallWP
 						initialValues={getInitialValues(firstTaskSuccess)}
 						onSuccess={setThirdTaskSuccess}
 						onError={setThirdTaskError}
@@ -66,9 +66,25 @@ const ProjectKickstart = () => {
 				""
 			)}
 			{thirdTaskSuccess ? (
-				<Link url={`http://${thirdTaskSuccess.url}`}>
-					<Color green>Open wordpress site</Color>
-				</Link>
+				<Fragment>
+					<Box paddingTop={1} paddingBottom={1}>
+						<Divider title="4/4. Install plugins and themes" />
+					</Box>
+					<InstallPackage
+						initialValues={getInitialValues(firstTaskSuccess)}
+						onSuccess={setThirdTaskSuccess}
+						onError={setThirdTaskError}
+					/>
+				</Fragment>
+			) : (
+				""
+			)}
+			{fourthTaskSuccess ? (
+				<Box paddingTop={1} paddingBottom={1}>
+					<Link url={`http://${thirdTaskSuccess.url}`}>
+						<Color green>Open wordpress site</Color>
+					</Link>
+				</Box>
 			) : (
 				""
 			)}

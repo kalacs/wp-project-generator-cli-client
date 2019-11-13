@@ -1012,6 +1012,207 @@ const Install = ({
 var _default = (0, _react.memo)(Install);
 
 exports.default = _default;
+},{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../services/http-client":"../services/http-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}],"services-wordpress-package/install.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _reactFinalForm = require("react-final-form");
+
+var _ink = require("ink");
+
+var _wpManagerClient = _interopRequireDefault(require("../../services/wp-manager-client"));
+
+var _fieldCreators = require("../../utils/factories/field-creators");
+
+var _FormField = _interopRequireDefault(require("../../components/FormField"));
+
+var _httpClient = require("../../services/http-client");
+
+var _finalFormSetFieldData = _interopRequireDefault(require("final-form-set-field-data"));
+
+var _dataApi = _interopRequireDefault(require("../../utils/hooks/data-api"));
+
+var _FetchHandler = _interopRequireDefault(require("../../components/FetchHandler"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)());
+
+const getPackage = name => data => data[name];
+
+const transformForPackage = data => ({
+  items: Object.keys(data).map(item => ({
+    label: item.toUpperCase(),
+    value: item
+  }))
+});
+
+const transformForContent = contentType => data => contentType in data && data[contentType] ? data[contentType].map(item => ({
+  label: item.name,
+  value: item.path
+})) : []; /// Install generated and started wordpress
+
+
+const InstallPackage = ({
+  initialValues = {},
+  onSuccess = () => null,
+  onError = () => null
+}) => {
+  const [activeField, setActiveField] = (0, _react.useState)(0);
+  const [submission, setSubmission] = (0, _react.useState)();
+  const [packages, setPackages] = (0, _react.useState)({
+    items: []
+  });
+  const [{
+    data: packageData,
+    error: packageDataError,
+    isLoading: packageDataIsLoading
+  }, setFetcher] = (0, _dataApi.default)();
+  const [{
+    data: pluginData,
+    error: pluginError,
+    isLoading: pluginIsLoading
+  }, submitPlugin] = (0, _dataApi.default)();
+  const [{
+    data: themeData,
+    error: themeError,
+    isLoading: themeIsLoading
+  }, submitTheme] = (0, _dataApi.default)();
+  (0, _react.useEffect)(() => {
+    setFetcher(() => wpManagerClient.getWordpressPackages);
+  }, []);
+
+  if (themeData && themeData.status === 200 && pluginData && pluginData.status === 200) {
+    onSuccess(submission);
+  } else {
+    onError(themeData);
+  }
+
+  if (themeError && pluginError) {
+    onError(pluginError);
+  }
+
+  const beforeSubmission = formData => {
+    const submission = Object.assign({}, formData, {
+      container: `${formData.projectName}-wordpress`,
+      network: `${formData.projectName}-wp-network`,
+      projectPrefix: formData.projectName
+    });
+    setSubmission(submission);
+    submitPlugin(() => wpManagerClient.installWordpressPlugins.bind(null, submission));
+    submitTheme(() => wpManagerClient.installWordpressTheme.bind(null, submission));
+  };
+
+  const fields = [(0, _fieldCreators.createTextInput)("projectName", "Project name"), (0, _fieldCreators.createSelectInput)("package", "Package", packages), (0, _fieldCreators.createMultiSelectInput)("plugins", "Plugins"), (0, _fieldCreators.createSelectInput)("theme", "Theme")];
+  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
+    onErrorMessage: "Something went wrong",
+    onLoadMessage: "Get packages from server ...",
+    onSuccessMessage: "Request done",
+    isLoading: packageDataIsLoading,
+    hasBeenLoaded: packageData || packageDataError,
+    hasError: packageDataError !== null
+  }), _react.default.createElement(_reactFinalForm.Form, {
+    onSubmit: beforeSubmission,
+    initialValues: initialValues,
+    mutators: {
+      setFieldData: _finalFormSetFieldData.default
+    }
+  }, ({
+    handleSubmit,
+    validating,
+    form
+  }) => {
+    const packageState = form.getFieldState("package");
+    const selectedPackage = packageState && "value" in packageState ? packageState.value : "";
+
+    if (packageData) {
+      form.mutators.setFieldData("package", {
+        inputConfig: transformForPackage(packageData.data)
+      });
+    }
+
+    if (selectedPackage) {
+      form.mutators.setFieldData("plugins", {
+        inputConfig: {
+          items: transformForContent("plugins")(getPackage(selectedPackage)(packageData.data))
+        }
+      });
+      form.mutators.setFieldData("theme", {
+        inputConfig: {
+          items: transformForContent("themes")(getPackage(selectedPackage)(packageData.data))
+        }
+      });
+    }
+
+    return _react.default.createElement(_ink.Box, {
+      flexDirection: "column"
+    }, fields.map(({
+      name,
+      label,
+      placeholder,
+      format,
+      validate,
+      Input,
+      inputConfig
+    }, index) => _react.default.createElement(_FormField.default, _extends({
+      key: name
+    }, {
+      name,
+      label,
+      placeholder,
+      format,
+      validate,
+      Input,
+      inputConfig,
+      isActive: activeField === index,
+      onSubmit: ({
+        meta,
+        input
+      }) => {
+        if (meta.valid && !validating) {
+          setActiveField(value => value + 1); // go to next field
+
+          if (activeField === fields.length - 1) {
+            // last field, so submit
+            handleSubmit();
+          }
+        } else {
+          input.onBlur(); // mark as touched to show error
+        }
+      }
+    }))), submission ? _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
+      onErrorMessage: "Something went wrong",
+      onLoadMessage: "`Installing plugins`",
+      onSuccessMessage: "Plugins installed",
+      isLoading: pluginIsLoading,
+      hasBeenLoaded: pluginData || pluginError,
+      hasError: pluginError !== null
+    }), _react.default.createElement(_FetchHandler.default, {
+      onErrorMessage: "Something went wrong",
+      onLoadMessage: "`Installing theme`",
+      onSuccessMessage: "Theme installed",
+      isLoading: themeIsLoading,
+      hasBeenLoaded: themeData || themeError,
+      hasError: themeError !== null
+    })) : "");
+  }));
+};
+
+var _default = (0, _react.memo)(InstallPackage);
+
+exports.default = _default;
 },{"../../services/wp-manager-client":"../services/wp-manager-client.js","../../utils/factories/field-creators":"../utils/factories/field-creators.js","../../components/FormField":"../components/FormField.js","../../services/http-client":"../services/http-client.js","../../utils/hooks/data-api":"../utils/hooks/data-api.js","../../components/FetchHandler":"../components/FetchHandler.js"}],"project/kickstart.js":[function(require,module,exports) {
 "use strict";
 
@@ -1033,6 +1234,8 @@ var _install = _interopRequireDefault(require("../services-wordpress/install"));
 var _inkLink = _interopRequireDefault(require("ink-link"));
 
 var _inkDivider = _interopRequireDefault(require("ink-divider"));
+
+var _install2 = _interopRequireDefault(require("../services-wordpress-package/install"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1095,14 +1298,26 @@ const ProjectKickstart = () => {
     initialValues: getInitialValues(firstTaskSuccess),
     onSuccess: setThirdTaskSuccess,
     onError: setThirdTaskError
-  })) : "", thirdTaskSuccess ? _react.default.createElement(_inkLink.default, {
+  })) : "", thirdTaskSuccess ? _react.default.createElement(_react.Fragment, null, _react.default.createElement(_ink.Box, {
+    paddingTop: 1,
+    paddingBottom: 1
+  }, _react.default.createElement(_inkDivider.default, {
+    title: "4/4. Install plugins and themes"
+  })), _react.default.createElement(_install2.default, {
+    initialValues: getInitialValues(firstTaskSuccess),
+    onSuccess: setThirdTaskSuccess,
+    onError: setThirdTaskError
+  })) : "", fourthTaskSuccess ? _react.default.createElement(_ink.Box, {
+    paddingTop: 1,
+    paddingBottom: 1
+  }, _react.default.createElement(_inkLink.default, {
     url: `http://${thirdTaskSuccess.url}`
   }, _react.default.createElement(_ink.Color, {
     green: true
-  }, "Open wordpress site")) : "");
+  }, "Open wordpress site"))) : "");
 };
 
 var _default = ProjectKickstart;
 exports.default = _default;
-},{"./create":"project/create.js","../services/create":"services/create.js","../services-wordpress/install":"services-wordpress/install.js"}]},{},["project/kickstart.js"], null)
+},{"./create":"project/create.js","../services/create":"services/create.js","../services-wordpress/install":"services-wordpress/install.js","../services-wordpress-package/install":"services-wordpress-package/install.js"}]},{},["project/kickstart.js"], null)
 //# sourceMappingURL=/project/kickstart.js.map

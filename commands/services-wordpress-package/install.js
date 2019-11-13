@@ -8,7 +8,6 @@ import {
 	createSelectInput
 } from "../../utils/factories/field-creators"
 import FormField from "../../components/FormField"
-import Fetcher from "../../components/Fetcher"
 import { getConfig } from "../../services/http-client"
 import setFieldData from "final-form-set-field-data"
 import useDataAPI from "../../utils/hooks/data-api"
@@ -28,7 +27,11 @@ const transformForContent = (contentType) => (data) =>
 		: []
 
 /// Install generated and started wordpress
-const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) => {
+const InstallPackage = ({
+	initialValues = {},
+	onSuccess = () => null,
+	onError = () => null
+}) => {
 	const [activeField, setActiveField] = useState(0)
 	const [submission, setSubmission] = useState()
 	const [packages, setPackages] = useState({ items: [] })
@@ -48,6 +51,20 @@ const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) 
 	useEffect(() => {
 		setFetcher(() => wpManagerClient.getWordpressPackages)
 	}, [])
+
+	if (
+		themeData &&
+		themeData.status === 200 &&
+		pluginData && pluginData.status === 200
+	) {
+		onSuccess(submission)
+	} else {
+		onError(themeData)
+	}
+
+	if (themeError && pluginError) {
+		onError(pluginError)
+	}
 
 	const beforeSubmission = (formData) => {
 		const submission = Object.assign({}, formData, {
@@ -91,7 +108,7 @@ const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) 
 
 					if (packageData) {
 						form.mutators.setFieldData("package", {
-							inputConfig: transformForPackage(packageData)
+							inputConfig: transformForPackage(packageData.data)
 						})
 					}
 
@@ -99,14 +116,14 @@ const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) 
 						form.mutators.setFieldData("plugins", {
 							inputConfig: {
 								items: transformForContent("plugins")(
-									getPackage(selectedPackage)(packageData)
+									getPackage(selectedPackage)(packageData.data)
 								)
 							}
 						})
 						form.mutators.setFieldData("theme", {
 							inputConfig: {
 								items: transformForContent("themes")(
-									getPackage(selectedPackage)(packageData)
+									getPackage(selectedPackage)(packageData.data)
 								)
 							}
 						})
