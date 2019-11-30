@@ -79,12 +79,16 @@ const InstallPackage = ({
 		submitTheme(() => wpManagerClient.installWordpressTheme.bind(null, submission))
 	}
 
-	const fields = [
-		createTextInput("projectName", "Project name"),
-		createSelectInput("package", "Package", packages),
-		createMultiSelectInput("plugins", "Plugins"),
-		createSelectInput("theme", "Theme")
-	]
+	const fieldConfig = {
+		projectName: createTextInput("projectName", "Project name"),
+		package: createSelectInput("package", "Package", packages),
+		plugins: createMultiSelectInput("plugins", "Plugins"),
+		theme: createSelectInput("theme", "Theme")
+	}
+	const initialValuesProperties = Object.keys(initialValues);
+	const fields = initialValuesProperties.length > 0 ? Object.entries(fieldConfig).filter(([fieldName, field]) => {
+		return initialValuesProperties.includes(fieldName) ? null : field;
+	}).map(([,field]) => field) : Object.values(fieldConfig);
 
 	return (
 		<Fragment>

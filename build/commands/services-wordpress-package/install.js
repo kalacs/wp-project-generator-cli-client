@@ -799,7 +799,16 @@ const InstallPackage = ({
     submitTheme(() => wpManagerClient.installWordpressTheme.bind(null, submission));
   };
 
-  const fields = [(0, _fieldCreators.createTextInput)("projectName", "Project name"), (0, _fieldCreators.createSelectInput)("package", "Package", packages), (0, _fieldCreators.createMultiSelectInput)("plugins", "Plugins"), (0, _fieldCreators.createSelectInput)("theme", "Theme")];
+  const fieldConfig = {
+    projectName: (0, _fieldCreators.createTextInput)("projectName", "Project name"),
+    package: (0, _fieldCreators.createSelectInput)("package", "Package", packages),
+    plugins: (0, _fieldCreators.createMultiSelectInput)("plugins", "Plugins"),
+    theme: (0, _fieldCreators.createSelectInput)("theme", "Theme")
+  };
+  const initialValuesProperties = Object.keys(initialValues);
+  const fields = initialValuesProperties.length > 0 ? Object.entries(fieldConfig).filter(([fieldName, field]) => {
+    return initialValuesProperties.includes(fieldName) ? null : field;
+  }).map(([, field]) => field) : Object.values(fieldConfig);
   return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
     onErrorMessage: "Something went wrong",
     onLoadMessage: "Get packages from server ...",

@@ -22,13 +22,12 @@ const ProjectKickstart = () => {
 	const getInitialValues = ({
 		project: {
 			prefix: projectPrefix,
-			webserver: { port }
 		}
 	}) => ({
 		projectPrefix,
 		container: `${projectPrefix}-wordpress`,
 		network: `${projectPrefix}-wp-network`,
-		url: `0.0.0.0:${port}`
+		url: `${projectPrefix}.localhost`
 	})
 
 	return (

@@ -52,13 +52,6 @@ const fields = [
 		undefined,
 		isRequired
 	),
-	createTextInput(
-		"project.webserver.port",
-		"Webserver port",
-		"",
-		undefined,
-		isRequired
-	)
 ]
 
 /// Generate new wordpress project from template

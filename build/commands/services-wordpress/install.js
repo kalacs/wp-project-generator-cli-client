@@ -734,9 +734,8 @@ const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)
 
 const isRequired = value => !value ? "Required" : undefined;
 
-const noFormatNoPlaceholderRequired = (name, label) => [name, label, "", undefined, isRequired];
+const noFormatNoPlaceholderRequired = (name, label) => [name, label, "", undefined, isRequired]; /// Install generated and started wordpress
 
-const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("projectPrefix", "Project name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("container", "Container name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("network", "Network name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("url", "WP Url")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("title", "Title")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminName", "Admin name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminPassword", "Admin password")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminEmail", "Admin email"))]; /// Install generated and started wordpress
 
 const Install = ({
   initialValues = {},
@@ -762,6 +761,20 @@ const Install = ({
     onError(error);
   }
 
+  const fieldConfig = {
+    projectPrefix: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("projectPrefix", "Project name")),
+    container: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("container", "Container name")),
+    network: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("network", "Network name")),
+    url: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("url", "WP Url")),
+    title: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("title", "Title")),
+    adminName: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminName", "Admin name")),
+    adminPassword: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminPassword", "Admin password")),
+    adminEmail: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminEmail", "Admin email"))
+  };
+  const initialValuesProperties = Object.keys(initialValues);
+  const fields = initialValuesProperties.length > 0 ? Object.entries(fieldConfig).filter(([fieldName, field]) => {
+    return initialValuesProperties.includes(fieldName) ? null : field;
+  }).map(([, field]) => field) : Object.values(fieldConfig);
   return _react.default.createElement(_reactFinalForm.Form, {
     onSubmit: data => {
       setFormData(data);
