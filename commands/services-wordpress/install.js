@@ -17,24 +17,43 @@ const noFormatNoPlaceholderRequired = (name, label) => [
 	undefined,
 	isRequired
 ]
-const fields = [
-	createTextInput(...noFormatNoPlaceholderRequired("projectPrefix", "Project name")),
-	createTextInput(...noFormatNoPlaceholderRequired("container", "Container name")),
-	createTextInput(...noFormatNoPlaceholderRequired("network", "Network name")),
-	createTextInput(...noFormatNoPlaceholderRequired("url", "WP Url")),
-	createTextInput(...noFormatNoPlaceholderRequired("title", "Title")),
-	createTextInput(...noFormatNoPlaceholderRequired("adminName", "Admin name")),
-	createTextInput(
-		...noFormatNoPlaceholderRequired("adminPassword", "Admin password")
-	),
-	createTextInput(...noFormatNoPlaceholderRequired("adminEmail", "Admin email"))
-]
 
 /// Install generated and started wordpress
-const Install = ({ initialValues = {}, onData = () => {} }) => {
+const Install = ({
+	initialValues = {},
+	onSuccess = () => null,
+	onError = () => null
+}) => {
 	const [activeField, setActiveField] = React.useState(0)
 	const [formData, setFormData] = useState()
 	const [{ data, error, isLoading }, setFetcher] = useDataAPI()
+
+	if (data && data.status === 200) {
+		onSuccess(data)
+	} else {
+		onError(data)
+	}
+
+	if (error) {
+		onError(error)
+	}
+
+	const fieldConfig = {
+		projectPrefix: createTextInput(...noFormatNoPlaceholderRequired("projectPrefix", "Project name")),
+		container: createTextInput(...noFormatNoPlaceholderRequired("container", "Container name")),
+		network: createTextInput(...noFormatNoPlaceholderRequired("network", "Network name")),
+		url: createTextInput(...noFormatNoPlaceholderRequired("url", "WP Url")),
+		title: createTextInput(...noFormatNoPlaceholderRequired("title", "Title")),
+		adminName: createTextInput(...noFormatNoPlaceholderRequired("adminName", "Admin name")),
+		adminPassword: createTextInput(
+			...noFormatNoPlaceholderRequired("adminPassword", "Admin password")
+		),
+		adminEmail: createTextInput(...noFormatNoPlaceholderRequired("adminEmail", "Admin email"))
+	}
+	const initialValuesProperties = Object.keys(initialValues);
+	const fields = initialValuesProperties.length > 0 ? Object.entries(fieldConfig).filter(([fieldName, field]) => {
+		return initialValuesProperties.includes(fieldName) ? null : field;
+	}).map(([,field]) => field) : Object.values(fieldConfig);
 
 	return (
 		<Form
@@ -43,7 +62,6 @@ const Install = ({ initialValues = {}, onData = () => {} }) => {
 				setFetcher(() =>
 					wpManagerClient.installProjectServiceWordpress.bind(null, data)
 				)
-				onData(data)
 			}}
 			initialValues={initialValues}
 		>

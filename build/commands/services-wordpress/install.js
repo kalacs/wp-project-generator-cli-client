@@ -589,7 +589,7 @@ var _util = require("util");
 
 const useDataAPI = () => {
   const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)({});
+  const [data, setData] = (0, _react.useState)(null);
   const [error, setError] = (0, _react.useState)(null);
   const [fetcher, setFetcher] = (0, _react.useState)();
   (0, _react.useEffect)(() => {
@@ -597,8 +597,8 @@ const useDataAPI = () => {
       try {
         setError(null);
         setIsLoading(true);
-        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : {};
-        setData(response.data);
+        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : null;
+        setData(response);
         setIsLoading(false);
       } catch (error) {
         setError(error);
@@ -689,9 +689,9 @@ const FetchHandler = ({
     loadingMessage: onLoadMessage
   }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     red: true
-  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+  }, "\u2716", ' ', onErrorMessage)) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     green: true
-  }, "\u2714 "), onSuccessMessage));
+  }, "\u2714", ' ', onSuccessMessage)));
 };
 
 var _default = FetchHandler;
@@ -734,13 +734,13 @@ const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)
 
 const isRequired = value => !value ? "Required" : undefined;
 
-const noFormatNoPlaceholderRequired = (name, label) => [name, label, "", undefined, isRequired];
+const noFormatNoPlaceholderRequired = (name, label) => [name, label, "", undefined, isRequired]; /// Install generated and started wordpress
 
-const fields = [(0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("projectPrefix", "Project name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("container", "Container name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("network", "Network name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("url", "WP Url")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("title", "Title")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminName", "Admin name")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminPassword", "Admin password")), (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminEmail", "Admin email"))]; /// Install generated and started wordpress
 
 const Install = ({
   initialValues = {},
-  onData = () => {}
+  onSuccess = () => null,
+  onError = () => null
 }) => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
@@ -750,11 +750,35 @@ const Install = ({
     error,
     isLoading
   }, setFetcher] = (0, _dataApi.default)();
+
+  if (data && data.status === 200) {
+    onSuccess(data);
+  } else {
+    onError(data);
+  }
+
+  if (error) {
+    onError(error);
+  }
+
+  const fieldConfig = {
+    projectPrefix: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("projectPrefix", "Project name")),
+    container: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("container", "Container name")),
+    network: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("network", "Network name")),
+    url: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("url", "WP Url")),
+    title: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("title", "Title")),
+    adminName: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminName", "Admin name")),
+    adminPassword: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminPassword", "Admin password")),
+    adminEmail: (0, _fieldCreators.createTextInput)(...noFormatNoPlaceholderRequired("adminEmail", "Admin email"))
+  };
+  const initialValuesProperties = Object.keys(initialValues);
+  const fields = initialValuesProperties.length > 0 ? Object.entries(fieldConfig).filter(([fieldName, field]) => {
+    return initialValuesProperties.includes(fieldName) ? null : field;
+  }).map(([, field]) => field) : Object.values(fieldConfig);
   return _react.default.createElement(_reactFinalForm.Form, {
     onSubmit: data => {
       setFormData(data);
       setFetcher(() => wpManagerClient.installProjectServiceWordpress.bind(null, data));
-      onData(data);
     },
     initialValues: initialValues
   }, ({

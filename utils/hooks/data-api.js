@@ -3,7 +3,7 @@ import { isFunction } from "util"
 
 const useDataAPI = () => {
 	const [isLoading, setIsLoading] = useState(false)
-	const [data, setData] = useState({})
+	const [data, setData] = useState(null)
 	const [error, setError] = useState(null)
 	const [fetcher, setFetcher] = useState()
 
@@ -12,8 +12,8 @@ const useDataAPI = () => {
 			try {
 				setError(null)
 				setIsLoading(true)
-				const response = isFunction(fetcher) ? await fetcher.call() : {}
-				setData(response.data)
+				const response = isFunction(fetcher) ? await fetcher.call() : null
+				setData(response);
 				setIsLoading(false)
 			} catch (error) {
 				setError(error)
@@ -22,7 +22,6 @@ const useDataAPI = () => {
 		}
 		fetch()
 	}, [fetcher])
-
 	return [{ data, isLoading, error }, setFetcher]
 }
 

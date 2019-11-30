@@ -647,9 +647,9 @@ const FetchHandler = ({
     loadingMessage: onLoadMessage
   }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     red: true
-  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+  }, "\u2716", ' ', onErrorMessage)) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     green: true
-  }, "\u2714 "), onSuccessMessage));
+  }, "\u2714", ' ', onSuccessMessage)));
 };
 
 var _default = FetchHandler;
@@ -668,7 +668,7 @@ var _util = require("util");
 
 const useDataAPI = () => {
   const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)({});
+  const [data, setData] = (0, _react.useState)(null);
   const [error, setError] = (0, _react.useState)(null);
   const [fetcher, setFetcher] = (0, _react.useState)();
   (0, _react.useEffect)(() => {
@@ -676,8 +676,8 @@ const useDataAPI = () => {
       try {
         setError(null);
         setIsLoading(true);
-        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : {};
-        setData(response.data);
+        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : null;
+        setData(response);
         setIsLoading(false);
       } catch (error) {
         setError(error);
@@ -734,10 +734,11 @@ const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)
 
 const isRequired = value => !value ? "Required" : undefined;
 
-const fields = [(0, _fieldCreators.createTextInput)("project.prefix", "Project prefix", "my-awesome-project", value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, "").replace(/ /g, "-") : "", isRequired), (0, _fieldCreators.createTextInput)("project.database.name", "Database name", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.user", "Database user", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.password", "Database password", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.rootPassword", "Database root password", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.webserver.port", "Webserver port", "", undefined, isRequired)]; /// Generate new wordpress project from template
+const fields = [(0, _fieldCreators.createTextInput)("project.prefix", "Project prefix", "my-awesome-project", value => value ? value.toLowerCase().replace(/[^a-z \\-]/g, "").replace(/ /g, "-") : "", isRequired), (0, _fieldCreators.createTextInput)("project.database.name", "Database name", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.user", "Database user", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.password", "Database password", "", undefined, isRequired), (0, _fieldCreators.createTextInput)("project.database.rootPassword", "Database root password", "", undefined, isRequired)]; /// Generate new wordpress project from template
 
 const Generate = ({
-  onData = () => {}
+  onSuccess = () => null,
+  onError = () => null
 }) => {
   const [activeField, setActiveField] = _react.default.useState(0);
 
@@ -747,13 +748,23 @@ const Generate = ({
     error,
     isLoading
   }, setFetcher] = (0, _dataApi.default)();
+
+  if (data && data.status === 200) {
+    onSuccess(formData);
+  } else {
+    onError(data);
+  }
+
+  if (error) {
+    onError(error);
+  }
+
   return _react.default.createElement(_ink.Box, {
     flexDirection: "column"
   }, _react.default.createElement(_reactFinalForm.Form, {
-    onSubmit: data => {
-      setFormData(data);
-      setFetcher(() => wpManagerClient.createWordpressProject.bind(null, data));
-      onData(data);
+    onSubmit: submission => {
+      setFormData(submission);
+      setFetcher(() => wpManagerClient.createWordpressProject.bind(null, submission));
     }
   }, ({
     handleSubmit,
@@ -795,7 +806,7 @@ const Generate = ({
       }
     }
   }))))), formData ? _react.default.createElement(_FetchHandler.default, {
-    onErrorMessage: "Something went wrong",
+    onErrorMessage: `Something went wrong (${error})`,
     onLoadMessage: `Generating project: "${formData.project.prefix}"`,
     onSuccessMessage: "Project structure has been created.",
     isLoading: isLoading,

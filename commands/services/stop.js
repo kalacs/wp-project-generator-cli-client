@@ -20,7 +20,7 @@ const ServiceStop = ({ name }) => {
 				onLoadMessage={`Stop "${name}" project's services `}
 				onSuccessMessage="Services have been stopped."
 				isLoading={isLoading}
-				hasBeenLoaded={data || error}
+				hasBeenLoaded={!!(data || error)}
 				hasError={error !== null}
 			/>
 		</Fragment>

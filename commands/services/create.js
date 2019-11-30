@@ -7,14 +7,20 @@ import FetchHandler from "../../components/FetchHandler"
 
 const wpManagerClient = createWPManagerClient(getConfig())
 /// Create services
-const Create = ({ name, onData = () => {} }) => {
+const Create = ({ name, onSuccess = () => null, onError = () => null }) => {
 	const [{ data, error, isLoading }, setFetcher] = useDataAPI()
 	useEffect(() => {
 		setFetcher(() => wpManagerClient.createProjectServices.bind(null, name))
 	}, [])
 
-	if (data) {
-		onData(data)
+	if (data && data.status === 200) {
+		onSuccess(data)
+	} else {
+		onError(data)
+	}
+
+	if (error) {
+		onError(error)
 	}
 
 	return (
