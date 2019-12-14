@@ -386,7 +386,7 @@ var _util = require("util");
 
 const useDataAPI = () => {
   const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)({});
+  const [data, setData] = (0, _react.useState)(null);
   const [error, setError] = (0, _react.useState)(null);
   const [fetcher, setFetcher] = (0, _react.useState)();
   (0, _react.useEffect)(() => {
@@ -394,8 +394,8 @@ const useDataAPI = () => {
       try {
         setError(null);
         setIsLoading(true);
-        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : {};
-        setData(response.data);
+        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : null;
+        setData(response);
         setIsLoading(false);
       } catch (error) {
         setError(error);
@@ -486,9 +486,9 @@ const FetchHandler = ({
     loadingMessage: onLoadMessage
   }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     red: true
-  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+  }, "\u2716", ' ', onErrorMessage)) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     green: true
-  }, "\u2714 "), onSuccessMessage));
+  }, "\u2714", ' ', onSuccessMessage)));
 };
 
 var _default = FetchHandler;
@@ -542,10 +542,10 @@ const ServiceIndex = ({
     onLoadMessage: `Get ${name} project's statuses...`,
     onSuccessMessage: "Rows fetched",
     isLoading: isLoading,
-    hasBeenLoaded: data || error,
+    hasBeenLoaded: !!(data || error),
     hasError: error !== null
   }), data ? _react.default.createElement(_Table.default, {
-    data: Array.isArray(data) ? data.map(({
+    data: Array.isArray(data.data) ? data.data.map(({
       names,
       ports: rawPorts,
       status: rawStatus

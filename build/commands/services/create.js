@@ -336,7 +336,7 @@ var _util = require("util");
 
 const useDataAPI = () => {
   const [isLoading, setIsLoading] = (0, _react.useState)(false);
-  const [data, setData] = (0, _react.useState)({});
+  const [data, setData] = (0, _react.useState)(null);
   const [error, setError] = (0, _react.useState)(null);
   const [fetcher, setFetcher] = (0, _react.useState)();
   (0, _react.useEffect)(() => {
@@ -344,8 +344,8 @@ const useDataAPI = () => {
       try {
         setError(null);
         setIsLoading(true);
-        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : {};
-        setData(response.data);
+        const response = (0, _util.isFunction)(fetcher) ? await fetcher.call() : null;
+        setData(response);
         setIsLoading(false);
       } catch (error) {
         setError(error);
@@ -436,9 +436,9 @@ const FetchHandler = ({
     loadingMessage: onLoadMessage
   }) : hasError ? _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     red: true
-  }, "\u2716 "), onErrorMessage) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
+  }, "\u2716", ' ', onErrorMessage)) : _react.default.createElement(_ink.Text, null, _react.default.createElement(_ink.Color, {
     green: true
-  }, "\u2714 "), onSuccessMessage));
+  }, "\u2714", ' ', onSuccessMessage)));
 };
 
 var _default = FetchHandler;
@@ -473,7 +473,8 @@ const wpManagerClient = (0, _wpManagerClient.default)((0, _httpClient.getConfig)
 
 const Create = ({
   name,
-  onData = () => {}
+  onSuccess = () => null,
+  onError = () => null
 }) => {
   const [{
     data,
@@ -484,8 +485,14 @@ const Create = ({
     setFetcher(() => wpManagerClient.createProjectServices.bind(null, name));
   }, []);
 
-  if (data) {
-    onData(data);
+  if (data && data.status === 200) {
+    onSuccess(data);
+  } else {
+    onError(data);
+  }
+
+  if (error) {
+    onError(error);
   }
 
   return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_FetchHandler.default, {
