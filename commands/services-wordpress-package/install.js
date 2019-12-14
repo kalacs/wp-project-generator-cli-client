@@ -8,7 +8,6 @@ import {
 	createSelectInput
 } from "../../utils/factories/field-creators"
 import FormField from "../../components/FormField"
-import Fetcher from "../../components/Fetcher"
 import { getConfig } from "../../services/http-client"
 import setFieldData from "final-form-set-field-data"
 import useDataAPI from "../../utils/hooks/data-api"
@@ -28,7 +27,11 @@ const transformForContent = (contentType) => (data) =>
 		: []
 
 /// Install generated and started wordpress
-const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) => {
+const InstallPackage = ({
+	initialValues = {},
+	onSuccess = () => null,
+	onError = () => null
+}) => {
 	const [activeField, setActiveField] = useState(0)
 	const [submission, setSubmission] = useState()
 	const [packages, setPackages] = useState({ items: [] })
@@ -49,6 +52,20 @@ const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) 
 		setFetcher(() => wpManagerClient.getWordpressPackages)
 	}, [])
 
+	if (
+		themeData &&
+		themeData.status === 200 &&
+		pluginData && pluginData.status === 200
+	) {
+		onSuccess(submission)
+	} else {
+		onError(themeData)
+	}
+
+	if (themeError && pluginError) {
+		onError(pluginError)
+	}
+
 	const beforeSubmission = (formData) => {
 		const submission = Object.assign({}, formData, {
 			container: `${formData.projectName}-wordpress`,
@@ -62,12 +79,16 @@ const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) 
 		submitTheme(() => wpManagerClient.installWordpressTheme.bind(null, submission))
 	}
 
-	const fields = [
-		createTextInput("projectName", "Project name"),
-		createSelectInput("package", "Package", packages),
-		createMultiSelectInput("plugins", "Plugins"),
-		createSelectInput("theme", "Theme")
-	]
+	const fieldConfig = {
+		projectName: createTextInput("projectName", "Project name"),
+		package: createSelectInput("package", "Package", packages),
+		plugins: createMultiSelectInput("plugins", "Plugins"),
+		theme: createSelectInput("theme", "Theme")
+	}
+	const initialValuesProperties = Object.keys(initialValues);
+	const fields = initialValuesProperties.length > 0 ? Object.entries(fieldConfig).filter(([fieldName, field]) => {
+		return initialValuesProperties.includes(fieldName) ? null : field;
+	}).map(([,field]) => field) : Object.values(fieldConfig);
 
 	return (
 		<Fragment>
@@ -91,7 +112,7 @@ const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) 
 
 					if (packageData) {
 						form.mutators.setFieldData("package", {
-							inputConfig: transformForPackage(packageData)
+							inputConfig: transformForPackage(packageData.data)
 						})
 					}
 
@@ -99,14 +120,14 @@ const InstallPackage = ({ projectName, initialValues = {}, onData = () => {} }) 
 						form.mutators.setFieldData("plugins", {
 							inputConfig: {
 								items: transformForContent("plugins")(
-									getPackage(selectedPackage)(packageData)
+									getPackage(selectedPackage)(packageData.data)
 								)
 							}
 						})
 						form.mutators.setFieldData("theme", {
 							inputConfig: {
 								items: transformForContent("themes")(
-									getPackage(selectedPackage)(packageData)
+									getPackage(selectedPackage)(packageData.data)
 								)
 							}
 						})

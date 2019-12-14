@@ -52,28 +52,30 @@ const fields = [
 		undefined,
 		isRequired
 	),
-	createTextInput(
-		"project.webserver.port",
-		"Webserver port",
-		"",
-		undefined,
-		isRequired
-	)
 ]
 
 /// Generate new wordpress project from template
-const Generate = ({ onData = () => {} }) => {
+const Generate = ({ onSuccess = () => null, onError = () => null }) => {
 	const [activeField, setActiveField] = React.useState(0)
 	const [formData, setFormData] = useState()
 	const [{ data, error, isLoading }, setFetcher] = useDataAPI()
 
+	if (data && data.status === 200) {
+		onSuccess(formData)
+	} else {
+		onError(data)
+	}
+
+	if (error) {
+		onError(error)
+	}
+
 	return (
 		<Box flexDirection="column">
 			<Form
-				onSubmit={(data) => {
-					setFormData(data)
-					setFetcher(() => wpManagerClient.createWordpressProject.bind(null, data))
-					onData(data)
+				onSubmit={submission => {
+					setFormData(submission)
+					setFetcher(() => wpManagerClient.createWordpressProject.bind(null, submission))
 				}}
 			>
 				{({ handleSubmit, validating }) => (
@@ -114,7 +116,7 @@ const Generate = ({ onData = () => {} }) => {
 			</Form>
 			{formData ? (
 				<FetchHandler
-					onErrorMessage="Something went wrong"
+					onErrorMessage={`Something went wrong (${error})`}
 					onLoadMessage={`Generating project: "${formData.project.prefix}"`}
 					onSuccessMessage="Project structure has been created."
 					isLoading={isLoading}

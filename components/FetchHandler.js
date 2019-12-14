@@ -16,11 +16,11 @@ const FetchHandler = ({
 				<LoadingIndicator isLoading={isLoading} loadingMessage={onLoadMessage} />
 			) : hasError ? (
 				<Text>
-					<Color red>✖ </Color>{onErrorMessage}
+					<Color red>✖{' '}{onErrorMessage}</Color>
 				</Text>
 			) : (
 				<Text>
-					<Color green>✔ </Color>{onSuccessMessage}
+					<Color green>✔{' '}{onSuccessMessage}</Color>
 				</Text>
 			)}
 		</Fragment>

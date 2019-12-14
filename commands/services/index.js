@@ -14,7 +14,6 @@ const ServiceIndex = ({ name }) => {
 	useEffect(() => {
 		setFetcher(() => wpManagerClient.getProjectServicesStatuses.bind(null, name))
 	}, [])
-
 	return (
 		<Fragment>
 			<FetchHandler
@@ -22,14 +21,14 @@ const ServiceIndex = ({ name }) => {
 				onLoadMessage={`Get ${name} project's statuses...`}
 				onSuccessMessage="Rows fetched"
 				isLoading={isLoading}
-				hasBeenLoaded={data || error}
+				hasBeenLoaded={!!(data || error)}
 				hasError={error !== null}
 			/>
 			{data ? (
 				<Table
 					data={
-						Array.isArray(data)
-							? data.map(({ names, ports: rawPorts, status: rawStatus }) => {
+						Array.isArray(data.data)
+							? data.data.map(({ names, ports: rawPorts, status: rawStatus }) => {
 									const status = /Up/.test(rawStatus)
 										? chalk.green("●")
 										: chalk.red("●")
